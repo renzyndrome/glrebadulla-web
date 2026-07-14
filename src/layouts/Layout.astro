@@ -1,0 +1,51 @@
+---
+// Self-hosted JetBrains Mono (latin subset, weights 400/500/600). font-display:
+// swap is built into @fontsource — protects Lighthouse (no Google Fonts round trip).
+import '@fontsource/jetbrains-mono/latin-400.css';
+import '@fontsource/jetbrains-mono/latin-500.css';
+import '@fontsource/jetbrains-mono/latin-600.css';
+import '../styles/tokens.css';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Laurence Rebadulla · Senior Software Engineer | AI Developer',
+  description = 'Senior Software Engineer and AI Developer. 9 years building web and backend systems in Python, Django, FastAPI and React, with LLM integration and RAG pipelines in production.',
+} = Astro.props;
+
+// Single page — canonical is the site root.
+const canonical = 'https://glrebadulla.dev/';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#050807" />
+    <meta name="color-scheme" content="dark" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="glrebadulla.dev" />
+    <!-- TODO: add <meta property="og:image"> once the profile photo / project
+         screenshots exist (see docs/PLAN.md → Pending owner inputs). -->
+    <meta name="twitter:card" content="summary" />
+
+    <meta name="generator" content={Astro.generator} />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

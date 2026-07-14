@@ -1,0 +1,51 @@
+/*
+ * Design tokens — glrebadulla.dev "Terminal Dark Green".
+ * Source of truth: design handoff skills/design-tokens.md + README.md.
+ * Palette is FIXED — do not add colors or gradients (except the hero radial overlay).
+ */
+:root {
+  /* --- palette --- */
+  --bg: #050807;              /* page background (near-black green) */
+  --bg-panel: #0a0f0b;        /* cards, chrome bar, contact band */
+  --text: #dbe5df;            /* headings, primary text */
+  --text-secondary: #8a988f;  /* body copy, descriptions */
+  --text-muted: #6b7a71;      /* labels, captions, # comments */
+  --text-faint: #4a5750;      /* footer */
+  --accent: #28c05a;          /* terminal green — prompts, links, primary buttons, highlights */
+  --accent-soft: #7fe6a3;     /* text on green-tinted chips */
+  --accent-border: rgba(40, 192, 90, 0.38);      /* featured-card / chip borders */
+  --accent-border-chip: rgba(40, 192, 90, 0.4);  /* featured skill chips (README 0.4) */
+  --accent-tint: rgba(40, 192, 90, 0.12);        /* chip backgrounds */
+
+  /* --- hairlines (white at low alpha) --- */
+  --hairline: rgba(255, 255, 255, 0.07);         /* section / card borders */
+  --hairline-soft: rgba(255, 255, 255, 0.06);    /* footer top border */
+  --hairline-frame: rgba(255, 255, 255, 0.12);   /* photo frame */
+  --hairline-chip: rgba(255, 255, 255, 0.06);    /* neutral project chips bg */
+  --hairline-hatch: rgba(255, 255, 255, 0.05);   /* photo placeholder hatch */
+  --hairline-hatch-project: rgba(255, 255, 255, 0.04); /* screenshot placeholder hatch */
+  --border-btn: rgba(255, 255, 255, 0.2);        /* secondary button border */
+  --border-btn-hover: rgba(255, 255, 255, 0.4);  /* secondary button hover border */
+
+  /* --- macOS window traffic lights --- */
+  --chrome-red: #ff5f56;
+  --chrome-yellow: #ffbd2e;
+  --chrome-green: #27c93f;
+
+  /* --- layout --- */
+  --container: 1240px;   /* max content width, centered */
+  --pad-x: 48px;         /* section side padding (overridden to 24px ≤640px) */
+
+  /* --- radii --- */
+  --r-btn: 6px;
+  --r-card: 8px;
+  --r-project: 10px;
+  --r-qr: 12px;
+  --r-chip: 4px;
+
+  /* --- type --- */
+  --font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* --- motion --- */
+  --hover: 0.15s ease;   /* 150ms hover transitions */
+}

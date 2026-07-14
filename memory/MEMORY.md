@@ -1,0 +1,2 @@
+- [build-environment](build-environment.md) — node is under nvm v22.17.0 (not on PATH); cssTarget pin in astro.config for Safari MQ compat
+- [cms-architecture](cms-architecture.md) — projects/blog are content collections; Keystatic local-mode admin gated to dev so prod stays static

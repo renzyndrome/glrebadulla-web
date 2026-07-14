@@ -1,0 +1,207 @@
+---
+// Projects — now driven by the `projects` content collection (edit via Keystatic
+// at /keystatic in dev, or the YAML files in src/content/projects/). Markup and
+// styles are unchanged from the hand-authored version.
+// Chip discipline: AI chips = green-tint bg + accent-soft text; neutral chips =
+// white/6% bg + secondary text.
+import { getCollection } from 'astro:content';
+import { getCommand } from '../lib/projectGlyphs';
+
+const projects = (await getCollection('projects'))
+  .map((entry) => ({
+    slug: entry.id,
+    name: entry.data.name ?? entry.id,
+    description: entry.data.description,
+    chips: entry.data.chips,
+    image: entry.data.image,
+    icon: entry.data.icon,
+    order: entry.data.order,
+  }))
+  .sort((a, b) => a.order - b.order);
+---
+
+<section class="projects pad-x" id="projects">
+  <p class="cmd"><span class="prompt">$</span> ls projects/ --sort=impact</p>
+  <h2 class="projects-h2">AI in production.</h2>
+
+  <div class="projects-grid">
+    {
+      projects.map((p) => (
+        <article class="project">
+          <div class="shot">
+            {p.image ? (
+              <img
+                src={p.image}
+                alt={`${p.name} screenshot`}
+                loading="lazy"
+                decoding="async"
+              />
+            ) : (
+              <div class="term" aria-hidden="true">
+                <span class="term-line">
+                  <span class="term-prompt">$</span>
+                  <span class="term-cmd">{getCommand(p.icon)}</span>
+                </span>
+              </div>
+            )}
+          </div>
+          <div class="project-body">
+            <h3 class="project-name">
+              <a class="project-link" href={`/projects/${p.slug}`}>{p.name}</a>
+            </h3>
+            <p class="project-desc">{p.description}</p>
+            <div class="project-chips">
+              {p.chips.map((c) => (
+                <span class:list={['chip', c.ai ? 'chip--ai' : 'chip--neutral']}>
+                  {c.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .projects {
+    padding-top: 0;
+    padding-bottom: 68px;
+  }
+
+  .cmd {
+    margin-bottom: 16px;
+  }
+
+  .projects-h2 {
+    margin: 0 0 26px;
+    font: 600 26px var(--font);
+    letter-spacing: -0.02em;
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+  }
+
+  .project {
+    position: relative;
+    background: var(--bg-panel);
+    border: 1px solid var(--hairline);
+    border-radius: var(--r-project);
+    overflow: hidden;
+    transition: border-color var(--hover);
+  }
+
+  .project:hover {
+    border-color: var(--accent-border);
+  }
+
+  /* Accessible card link: the name is the link; ::after makes the whole card
+     clickable while keeping the accessible name = project name. */
+  .project-link {
+    color: inherit;
+    transition: color var(--hover);
+  }
+
+  .project-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+
+  .project:hover .project-name {
+    color: var(--accent);
+  }
+
+  .shot {
+    height: 200px;
+    border-bottom: 1px solid var(--hairline);
+    overflow: hidden;
+  }
+
+  .shot img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /*
+   * A single, centered `$ command` on a dark inset "screen" — a minimal banner,
+   * distinct from the card's description. Green `$` is an allowed accent use.
+   */
+  .term {
+    height: 100%;
+    display: grid;
+    place-items: center;
+    padding: 0 24px;
+    background: var(--bg);
+    pointer-events: none;
+  }
+
+  .term-line {
+    font: 400 13.5px var(--font);
+    white-space: nowrap;
+    text-align: center;
+  }
+
+  .term-prompt {
+    color: var(--accent);
+  }
+
+  .term-cmd {
+    color: var(--text);
+  }
+
+  @media (max-width: 640px) {
+    .term-line {
+      font-size: 12.5px;
+    }
+  }
+
+  .project-body {
+    padding: 24px;
+  }
+
+  .project-name {
+    margin: 0 0 8px;
+    font: 600 16px var(--font);
+    color: var(--text);
+  }
+
+  .project-desc {
+    margin: 0 0 14px;
+    font: 400 13px/1.7 var(--font);
+    color: var(--text-secondary);
+  }
+
+  .project-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font: 400 11px var(--font);
+    padding: 4px 10px;
+    border-radius: var(--r-chip);
+  }
+
+  .chip--ai {
+    background: var(--accent-tint);
+    color: var(--accent-soft);
+  }
+
+  .chip--neutral {
+    background: var(--hairline-chip);
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 1024px) {
+    .projects-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

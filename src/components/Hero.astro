@@ -1,0 +1,156 @@
+---
+// Hero — particle-network canvas + rotating typed word. <fx-particles> must be a
+// DIRECT child of the hero (its mouse listener binds to parentElement). The typed
+// word ships with SSR fallback text "intelligent"; hero-fx.ts clears it before
+// animating so it never duplicates. Radial overlay uses README rgba(5,8,7,…)
+// values (these win over the slightly different 3a markup values).
+---
+
+<section class="hero" id="hero" aria-label="Introduction">
+  <fx-particles class="hero-fx" accent="#28c05a" aria-hidden="true"></fx-particles>
+  <div class="hero-overlay" aria-hidden="true"></div>
+
+  <div class="hero-content pad-x">
+    <p class="cmd"><span class="prompt">$</span> whoami</p>
+    <p class="tagline">
+      laurence-rebadulla · senior software engineer | ai developer · remote,
+      UTC+8 · open to work
+    </p>
+
+    <h1 class="headline">
+      I ship production software.<br />
+      Then I make it <fx-typeword
+        class="typeword"
+        words="intelligent,scalable,secure,reliable"
+        color="#28c05a">intelligent</fx-typeword
+      >.<span class="cursor" aria-hidden="true"></span>
+    </h1>
+
+    <p class="lede">
+      9 years building web applications and backend systems in Python, Django,
+      FastAPI, TypeScript and React. Recent focus: LLM integration and RAG
+      pipelines in production.
+    </p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="#projects">./view-projects</a>
+      <a class="btn btn-secondary" href="mailto:glrebadulla@gmail.com"
+        >./hire-me</a
+      >
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/hero-fx';
+</script>
+
+<style>
+  .hero {
+    position: relative;
+    height: 560px;
+    overflow: hidden;
+  }
+
+  .hero-fx {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 70% 90% at 30% 50%,
+      rgba(5, 8, 7, 0.5),
+      rgba(5, 8, 7, 0.93)
+    );
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    max-width: 840px;
+  }
+
+  .cmd {
+    margin-bottom: 10px;
+  }
+
+  .tagline {
+    margin-bottom: 26px;
+    font: 400 13px var(--font);
+    color: var(--text-secondary);
+  }
+
+  .headline {
+    margin: 0;
+    font: 600 44px/1.25 var(--font);
+    letter-spacing: -0.03em;
+  }
+
+  .typeword {
+    display: inline;
+    color: var(--accent);
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 22px;
+    height: 44px;
+    margin-left: 10px;
+    vertical-align: -6px;
+    background: var(--accent);
+    animation: term-blink 1.1s steps(1) infinite;
+  }
+
+  .lede {
+    margin: 26px 0 0;
+    max-width: 660px;
+    font: 400 14.5px/1.75 var(--font);
+    color: var(--text-secondary);
+  }
+
+  .actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 34px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .cursor {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .headline {
+      font-size: 32px;
+    }
+
+    .cursor {
+      width: 16px;
+      height: 32px;
+      vertical-align: -4px;
+    }
+
+    .hero {
+      height: auto;
+      min-height: 480px;
+    }
+
+    .hero-content {
+      padding-top: 64px;
+      padding-bottom: 48px;
+    }
+
+    .actions {
+      flex-wrap: wrap;
+    }
+  }
+</style>

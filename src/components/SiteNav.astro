@@ -1,0 +1,126 @@
+---
+// Sticky primary nav. Terminal-voice paths that smooth-scroll to sections.
+// Note the inversion vs section labels: here the `$` is MUTED and the path GREEN.
+// Section anchors are absolute (`/#id`) so they resolve from any page (e.g. /blog),
+// not just the homepage. `./blog` is a real route.
+const links = [
+  { href: '/#about', label: './about' },
+  { href: '/#skills', label: './skills' },
+  { href: '/#projects', label: './projects' },
+  { href: '/blog', label: './blog' },
+  { href: '/#experience', label: './experience' },
+  { href: '/#contact', label: './contact', accent: true },
+];
+---
+
+<nav class="nav" aria-label="Primary">
+  <a class="brand" href="/" aria-label="laurence-rebadulla, home"
+    >~/laurence-rebadulla<span class="brand-dollar">$</span></a
+  >
+  <ul class="links">
+    {
+      links.map((l) => (
+        <li>
+          <a href={l.href} class:list={['link', { 'link--accent': l.accent }]}>
+            {l.label}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  .nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 18px var(--pad-x);
+    background: rgba(5, 8, 7, 0.9);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .brand {
+    flex-shrink: 0;
+    font: 600 14px var(--font);
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .brand-dollar {
+    color: var(--text-muted);
+  }
+
+  .links {
+    display: flex;
+    gap: 26px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font: 500 13px var(--font);
+  }
+
+  .link {
+    color: var(--text-secondary);
+    transition: color var(--hover);
+  }
+
+  .link:hover {
+    color: var(--text);
+  }
+
+  .link--accent {
+    color: var(--accent);
+  }
+
+  .link--accent:hover {
+    color: var(--accent-soft);
+  }
+
+  /*
+   * ≤1024px: the link row scrolls horizontally inside the nav rather than
+   * collapsing to a JS menu (on brand). This matches the breakpoint where the
+   * rest of the layout collapses, so the non-shrinkable nav can never force
+   * whole-page horizontal overflow at tablet / large-phone widths (641–1024px).
+   */
+  @media (max-width: 1024px) {
+    .nav {
+      gap: 16px;
+    }
+
+    .links {
+      gap: 20px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .links::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /*
+   * ≤640px (mobile): grow the link + brand hit areas to ≥44px. The scroll row
+   * above forces overflow-y:auto, so min-height (not negative margins, which
+   * would be clipped) is the safe way to enlarge the touch target.
+   */
+  @media (max-width: 640px) {
+    .nav {
+      padding-block: 10px;
+    }
+
+    .brand,
+    .link {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+</style>

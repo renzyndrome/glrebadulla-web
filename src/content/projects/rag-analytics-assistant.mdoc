@@ -1,0 +1,29 @@
+---
+name: rag-analytics-assistant
+order: 10
+icon: retrieval
+description: Plain-language search over company analytics. Retrieval pipelines with OpenAI embeddings + LangChain ground every answer in real company data.
+chips:
+  - label: LangChain
+    ai: true
+  - label: OpenAI
+    ai: true
+  - label: FastAPI
+    ai: false
+---
+
+## What it does
+
+Ask a question in plain language and get an answer drawn from the company's own
+analytics, not a generic guess from the model.
+
+## Approach
+
+A retrieval pipeline embeds the source data, pulls the passages most relevant to
+each question, and grounds the model's answer in those passages. Every answer can
+be traced back to real records instead of invented ones.
+
+## Stack
+
+Python and FastAPI on the backend, OpenAI embeddings for retrieval, and LangChain
+to orchestrate the pipeline.

@@ -1,0 +1,160 @@
+---
+// Contact band. Email + CV download + WhatsApp QR. The download filename is the
+// exact string from the 3a markup — keep it verbatim.
+const cvDownloadName =
+  'Laurence Rebadulla - Senior Software Engineer AI Developer CV.pdf';
+
+const links = [
+  { href: 'https://glrebadulla.dev', label: 'glrebadulla.dev ↗' },
+  { href: 'https://github.com/renzyndrome', label: 'github ↗' },
+  { href: 'https://linkedin.com/in/laurencerebadulla', label: 'linkedin ↗' },
+];
+---
+
+<section class="contact pad-x" id="contact" aria-label="Contact">
+  <div class="contact-left">
+    <p class="cmd"><span class="prompt">$</span> ping laurence --now</p>
+    <h2 class="contact-h2">Let's build something.</h2>
+    <p class="contact-p">
+      Available for senior full-stack and AI integration work. Email me, or scan
+      the code to open a WhatsApp chat directly.
+    </p>
+    <div class="contact-actions">
+      <a class="btn btn-primary" href="mailto:glrebadulla@gmail.com"
+        >glrebadulla@gmail.com</a
+      >
+      <a
+        class="btn btn-secondary"
+        href="/uploads/latest-cv.pdf"
+        download={cvDownloadName}>↓ download-cv.pdf</a
+      >
+    </div>
+    <div class="contact-links">
+      {
+        links.map((l) => (
+          <a href={l.href} class="ext" target="_blank" rel="noopener">
+            {l.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+
+  <div class="qr">
+    <div class="qr-card">
+      <img
+        src="/wa-qr.png"
+        alt="WhatsApp QR code linking to a chat with Laurence"
+        width="180"
+        height="180"
+        decoding="async"
+      />
+    </div>
+    <p class="qr-caption">scan → WhatsApp</p>
+  </div>
+</section>
+
+<style>
+  .contact {
+    display: grid;
+    grid-template-columns: 1fr 220px;
+    gap: 56px;
+    align-items: center;
+    padding-top: 60px;
+    padding-bottom: 60px;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--hairline);
+  }
+
+  .cmd {
+    margin-bottom: 16px;
+  }
+
+  .contact-h2 {
+    margin: 0 0 14px;
+    font: 600 32px var(--font);
+    letter-spacing: -0.02em;
+  }
+
+  .contact-p {
+    margin: 0 0 26px;
+    max-width: 500px;
+    font: 400 13.5px/1.7 var(--font);
+    color: var(--text-secondary);
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  /* Contact buttons are 24px horizontal padding (vs 26px in the hero). */
+  .contact-actions .btn {
+    padding-inline: 24px;
+  }
+
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 22px;
+    margin-top: 24px;
+    font: 400 12.5px var(--font);
+    color: var(--text-muted);
+  }
+
+  .ext {
+    color: var(--text-muted);
+    transition: color var(--hover);
+  }
+
+  .ext:hover {
+    color: var(--text);
+  }
+
+  .qr {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .qr-card {
+    background: #fff;
+    padding: 14px;
+    border-radius: var(--r-qr);
+  }
+
+  .qr-card img {
+    width: 180px;
+    height: 180px;
+  }
+
+  .qr-caption {
+    margin: 0;
+    font: 400 12px var(--font);
+    color: var(--text-muted);
+  }
+
+  /* ≤1024px: single column, QR below the text and centered (per README). */
+  @media (max-width: 1024px) {
+    .contact {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      justify-items: start;
+    }
+
+    .qr {
+      justify-self: center;
+    }
+  }
+
+  /* ≤640px (mobile): ≥44px tap targets for the external link row. */
+  @media (max-width: 640px) {
+    .ext {
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+    }
+  }
+</style>

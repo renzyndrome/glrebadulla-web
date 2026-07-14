@@ -1,0 +1,101 @@
+/*
+ * Shared long-form (Markdoc) prose styling for article-style pages — blog posts
+ * and project detail pages. Imported globally by those pages. Palette-consistent,
+ * terminal aesthetic. Accent green only on links (an allowed use).
+ */
+.prose {
+  max-width: 720px;
+  font: 400 14.5px/1.8 var(--font);
+  color: var(--text-secondary);
+}
+
+.prose h2 {
+  margin: 36px 0 14px;
+  font: 600 20px var(--font);
+  letter-spacing: -0.01em;
+  color: var(--text);
+}
+
+.prose h3 {
+  margin: 28px 0 12px;
+  font: 600 16px var(--font);
+  color: var(--text);
+}
+
+.prose p {
+  margin: 0 0 18px;
+}
+
+.prose a {
+  color: var(--accent);
+  transition: color var(--hover);
+}
+
+.prose a:hover {
+  color: var(--accent-soft);
+}
+
+.prose strong {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.prose ul,
+.prose ol {
+  margin: 0 0 18px;
+  padding-left: 22px;
+}
+
+.prose li {
+  margin-bottom: 8px;
+}
+
+.prose li::marker {
+  color: var(--text-muted);
+}
+
+.prose blockquote {
+  margin: 0 0 18px;
+  padding-left: 16px;
+  border-left: 2px solid var(--accent-border);
+  color: var(--text-muted);
+}
+
+.prose code {
+  font: 400 0.9em var(--font);
+  padding: 2px 6px;
+  border-radius: var(--r-chip);
+  background: var(--bg-panel);
+  border: 1px solid var(--hairline);
+  color: var(--accent-soft);
+}
+
+.prose pre {
+  margin: 0 0 20px;
+  padding: 16px 18px;
+  border-radius: var(--r-card);
+  background: var(--bg-panel);
+  border: 1px solid var(--hairline);
+  overflow-x: auto;
+}
+
+.prose pre code {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--r-card);
+  border: 1px solid var(--hairline);
+}
+
+.prose hr {
+  margin: 32px 0;
+  border: 0;
+  border-top: 1px solid var(--hairline);
+}

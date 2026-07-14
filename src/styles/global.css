@@ -1,0 +1,195 @@
+/*
+ * Global primitives — reset, base type, shared components (buttons, hatch,
+ * skip link), and page-level layout. Component-specific styles live scoped
+ * inside each .astro file. Tokens: src/styles/tokens.css.
+ */
+
+/* ---------------------------------------------------------------- reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+* {
+  margin: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font: 400 14px/1.7 var(--font);
+  /* Tracking is set only on headings (h1 -0.03em, h2 -0.02em), matching 3a. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* ---------------------------------------------------------------- layout */
+/*
+ * The whole page is a centered "terminal window" column, max 1240px.
+ * Page bg and column bg are both --bg, so the seam is invisible; only the
+ * bg-panel bands (chrome bar, contact) read as centered panels — on brand.
+ */
+.terminal {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  background: var(--bg);
+}
+
+/* Horizontal padding shared by every full-width band/section. */
+.pad-x {
+  padding-inline: var(--pad-x);
+}
+
+/* Anchored sections clear the sticky nav when scrolled to. */
+:where(section[id]) {
+  scroll-margin-top: 72px;
+}
+
+/* ---------------------------------------------------------------- buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px; /* tap target — 2px over the ~42px design height, imperceptible */
+  padding: 13px 26px;
+  border: 1px solid transparent;
+  border-radius: var(--r-btn);
+  font: 600 13.5px var(--font);
+  cursor: pointer;
+  transition: filter var(--hover), border-color var(--hover), color var(--hover);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg); /* green buttons always use dark text */
+}
+
+.btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.btn-secondary {
+  border-color: var(--border-btn);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  border-color: var(--border-btn-hover);
+}
+
+/* ---------------------------------------------------------------- terminal bits */
+/* Section command labels: muted `$ command` with a green `$`. */
+.cmd {
+  font: 400 13px var(--font);
+  color: var(--text-muted);
+}
+
+.cmd .prompt {
+  color: var(--accent);
+}
+
+/* Placeholder hatch for pending photo / screenshots (from the 3a markup). */
+.hatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--hairline-hatch) 0 10px,
+    transparent 10px 20px
+  );
+}
+
+.hatch span {
+  font: 400 12px var(--font);
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- a11y */
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 200;
+  padding: 10px 16px;
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: var(--r-btn);
+  font: 600 13px var(--font);
+}
+
+.skip-link:focus {
+  left: 8px;
+  top: 8px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Remove the default focus ring only where focus-visible is supported. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ---------------------------------------------------------------- motion */
+/* Blinking hero cursor keyframe (applied in Hero.astro). */
+@keyframes term-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------------------------------------------------------------- responsive */
+@media (max-width: 640px) {
+  :root {
+    --pad-x: 24px;
+  }
+}

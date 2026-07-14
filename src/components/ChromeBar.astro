@@ -1,0 +1,53 @@
+---
+// Window chrome bar — decorative macOS title bar. The em-dash in "— zsh" is a
+// fixed design string (keep it); the "no em-dash" rule governs prose only.
+---
+
+<div class="chrome">
+  <span class="dots" aria-hidden="true">
+    <span class="dot dot--red"></span>
+    <span class="dot dot--yellow"></span>
+    <span class="dot dot--green"></span>
+  </span>
+  <span class="title">laurence@glrebadulla.dev — zsh</span>
+</div>
+
+<style>
+  .chrome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    background: var(--bg-panel);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .dots {
+    display: inline-flex;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 99px;
+  }
+
+  .dot--red {
+    background: var(--chrome-red);
+  }
+
+  .dot--yellow {
+    background: var(--chrome-yellow);
+  }
+
+  .dot--green {
+    background: var(--chrome-green);
+  }
+
+  .title {
+    margin-left: 14px;
+    font: 400 12px var(--font);
+    color: var(--text-muted);
+  }
+</style>

@@ -1,0 +1,95 @@
+---
+// Stats strip — 4 hairline-divided columns. Only `LLM+RAG` is green (accent
+// discipline: exactly one highlighted stat).
+const stats = [
+  { value: '9+', caption: 'years shipping software' },
+  { value: '4', caption: 'industries: media · health · gov · telecom' },
+  {
+    value: 'LLM+RAG',
+    caption: 'integration & retrieval pipelines in production',
+    accent: true,
+  },
+  { value: '100%', caption: 'remote with intl teams since 2023' },
+];
+---
+
+<section class="stats" aria-label="Highlights">
+  <dl class="stats-grid">
+    {
+      stats.map((s) => (
+        <div class="stat">
+          <dt class:list={['stat-value', { 'stat-value--accent': s.accent }]}>
+            {s.value}
+          </dt>
+          <dd class="stat-caption">{s.caption}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    margin: 0;
+    border-top: 1px solid var(--hairline);
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  .stat {
+    padding: 26px 40px;
+    border-right: 1px solid var(--hairline);
+  }
+
+  .stat:last-child {
+    border-right: none;
+  }
+
+  .stat-value {
+    font: 600 28px var(--font);
+    color: var(--text);
+  }
+
+  .stat-value--accent {
+    color: var(--accent);
+  }
+
+  .stat-caption {
+    margin: 4px 0 0;
+    font: 400 11.5px var(--font);
+    color: var(--text-muted);
+  }
+
+  /* ≤1024px: 2×2 grid; internal hairlines rebuilt for two columns. */
+  @media (max-width: 1024px) {
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stat {
+      border-right: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+    }
+
+    /* right column: no right border */
+    .stat:nth-child(2n) {
+      border-right: none;
+    }
+
+    /* bottom row: no bottom border (outer border handles it) */
+    .stat:nth-last-child(-n + 2) {
+      border-bottom: none;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .stat {
+      padding: 22px 24px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+    }
+  }
+</style>
