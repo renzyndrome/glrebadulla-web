@@ -21,11 +21,10 @@ const projects = defineCollection({
         })
       )
       .default([]),
-    // Optional public path to a screenshot (e.g. /images/projects/foo.png).
-    // When set, it overrides the ASCII glyph.
+    // Optional public path to an original, permission-cleared screenshot
+    // (e.g. /images/projects/foo.png). Most work is under NDA, so this is
+    // usually unset and the detail page shows the NDA note instead.
     image: z.string().optional(),
-    // Which terminal ASCII glyph fills the card (see src/lib/projectGlyphs.ts).
-    icon: z.string().default('terminal'),
   }),
 });
 

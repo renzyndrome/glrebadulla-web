@@ -1,7 +1,6 @@
 ---
 name: telehealth-platform
 order: 40
-icon: telehealth
 description: Employees book and meet mental-health practitioners over live chat, voice and video. Built with Python, Django REST, React and Next.js on AWS.
 chips:
   - label: Django REST
@@ -12,17 +11,36 @@ chips:
     ai: false
 ---
 
-## What it does
+## The product
 
-A telehealth platform where employees book and meet mental-health practitioners
-over live chat, voice and video.
+Employees book a session with a mental-health practitioner and meet over live chat,
+voice or video. That is two products really: the flow that gets someone booked, and the
+room the session actually happens in.
 
-## Approach
+## Real-time sessions
 
-End-to-end product work across scheduling, real-time communication, and the
-interfaces around them, built to stay reliable for sensitive sessions.
+A dropped call in this context is not a cosmetic bug. Sessions have to survive a shaky
+connection, reconnect without losing the thread of the conversation, and fall back to
+voice or chat when video will not hold. Presence has to be accurate on both sides too,
+because a practitioner sitting in an empty room and a patient who thinks nobody showed
+up are the same failure viewed from two ends.
+
+## Booking
+
+Booking looks simple from the outside and is where most of the constraints live.
+Practitioner availability, timezones, session length and double-booking all have to be
+enforced on the server, because the client cannot be the authority on whether a slot is
+still free. Two people requesting the last slot in the same second is ordinary traffic,
+not an edge case, and the database is the only place that argument can be settled.
+
+## Sensitive by default
+
+Mental-health sessions are close to the most private thing a system can hold. Access is
+scoped so people reach only their own records, and the surfaces that touch session
+content are kept few and deliberate. Reliability and privacy were treated as product
+requirements from the start rather than hardening applied at the end.
 
 ## Stack
 
-Python and Django REST on the backend, React and Next.js on the frontend, deployed
-on AWS.
+Python and Django REST, React and Next.js, on AWS. Two-week sprints with a distributed
+team, reporting to stakeholders directly.

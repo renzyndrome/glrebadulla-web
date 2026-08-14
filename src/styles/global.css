@@ -1,46 +1,63 @@
-/*
- * Global primitives — reset, base type, shared components (buttons, hatch,
- * skip link), and page-level layout. Component-specific styles live scoped
- * inside each .astro file. Tokens: src/styles/tokens.css.
- */
+/* Reset, base type, and the primitives shared across components.
+   Anything used by more than one section lives here; everything else stays in
+   that component's scoped <style>. See tokens.css for the system rationale. */
 
-/* ---------------------------------------------------------------- reset */
 *,
 *::before,
 *::after {
   box-sizing: border-box;
 }
 
-* {
-  margin: 0;
+html {
+  -webkit-text-size-adjust: 100%;
 }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font: 400 14px/1.7 var(--font);
-  /* Tracking is set only on headings (h1 -0.03em, h2 -0.02em), matching 3a. */
+  margin: 0;
+  background: var(--n900);
+  color: var(--t1);
+  font-family: var(--sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  overflow-wrap: break-word;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  min-height: 100vh;
 }
 
 h1,
 h2,
-h3 {
-  font-weight: 600;
-  text-wrap: balance;
+h3,
+h4,
+p,
+dl,
+dd,
+dt,
+ol,
+ul,
+li,
+figure,
+figcaption,
+table,
+blockquote {
+  margin: 0;
+  padding: 0;
 }
 
-p {
-  text-wrap: pretty;
+ol,
+ul {
+  list-style: none;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
 }
 
 a {
@@ -48,148 +65,273 @@ a {
   text-decoration: none;
 }
 
-img,
-svg,
-canvas {
-  display: block;
-  max-width: 100%;
+button {
+  font: inherit;
+  color: inherit;
 }
 
-/* ---------------------------------------------------------------- layout */
-/*
- * The whole page is a centered "terminal window" column, max 1240px.
- * Page bg and column bg are both --bg, so the seam is invisible; only the
- * bg-panel bands (chrome bar, contact) read as centered panels — on brand.
- */
-.terminal {
-  width: 100%;
-  max-width: var(--container);
-  margin-inline: auto;
-  background: var(--bg);
-}
-
-/* Horizontal padding shared by every full-width band/section. */
-.pad-x {
-  padding-inline: var(--pad-x);
-}
-
-/* Anchored sections clear the sticky nav when scrolled to. */
-:where(section[id]) {
-  scroll-margin-top: 72px;
-}
-
-/* ---------------------------------------------------------------- buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 44px; /* tap target — 2px over the ~42px design height, imperceptible */
-  padding: 13px 26px;
-  border: 1px solid transparent;
-  border-radius: var(--r-btn);
-  font: 600 13.5px var(--font);
-  cursor: pointer;
-  transition: filter var(--hover), border-color var(--hover), color var(--hover);
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: var(--bg); /* green buttons always use dark text */
-}
-
-.btn-primary:hover {
-  filter: brightness(1.1);
-}
-
-.btn-secondary {
-  border-color: var(--border-btn);
-  color: var(--text);
-}
-
-.btn-secondary:hover {
-  border-color: var(--border-btn-hover);
-}
-
-/* ---------------------------------------------------------------- terminal bits */
-/* Section command labels: muted `$ command` with a green `$`. */
-.cmd {
-  font: 400 13px var(--font);
-  color: var(--text-muted);
-}
-
-.cmd .prompt {
-  color: var(--accent);
-}
-
-/* Placeholder hatch for pending photo / screenshots (from the 3a markup). */
-.hatch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: repeating-linear-gradient(
-    45deg,
-    var(--hairline-hatch) 0 10px,
-    transparent 10px 20px
-  );
-}
-
-.hatch span {
-  font: 400 12px var(--font);
-  color: var(--text-muted);
-}
-
-/* ---------------------------------------------------------------- a11y */
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  z-index: 200;
-  padding: 10px 16px;
-  background: var(--accent);
-  color: var(--bg);
-  border-radius: var(--r-btn);
-  font: 600 13px var(--font);
-}
-
-.skip-link:focus {
-  left: 8px;
-  top: 8px;
+::selection {
+  background: var(--accent-select);
+  color: #fff;
 }
 
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
-  border-radius: 2px;
+  border-radius: var(--r-focus);
 }
 
-/* Remove the default focus ring only where focus-visible is supported. */
-:focus:not(:focus-visible) {
-  outline: none;
+/* --- utilities ----------------------------------------------------------- */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-/* ---------------------------------------------------------------- motion */
-/* Blinking hero cursor keyframe (applied in Hero.astro). */
-@keyframes term-blink {
-  0%,
-  49% {
-    opacity: 1;
+.skip {
+  position: absolute;
+  left: 20px;
+  top: -100px;
+  z-index: 20;
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  padding: 10px 14px;
+  border-radius: var(--r-btn);
+  background: var(--n800);
+  color: var(--t1);
+  border: 1px solid var(--hair-2);
+  box-shadow: var(--lift), var(--depth);
+}
+
+.skip:focus {
+  top: 12px;
+}
+
+/* The measure. Every hairline on the page aligns to this content width. */
+.shell {
+  max-width: var(--container);
+  margin: 0 auto;
+  padding: 0 var(--pad-x);
+}
+
+/* --- section frame ------------------------------------------------------- */
+/* Numbered head on the spine: number, title, right-aligned meta. Replaces the
+   old `$ command` header primitive. */
+
+.sec {
+  padding: var(--section-rhythm) 0 0;
+  scroll-margin-top: 72px;
+}
+
+.sec:last-of-type {
+  padding-bottom: var(--section-rhythm);
+}
+
+.sec-head {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr) auto;
+  column-gap: var(--gutter);
+  align-items: baseline;
+  padding-bottom: var(--s5);
+  border-bottom: 1px solid var(--hair);
+}
+
+.sec-num {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--t3);
+}
+
+.sec-head h2 {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+  font-weight: 500;
+  color: var(--t1);
+}
+
+.sec-meta {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  font-variant-numeric: tabular-nums;
+  color: var(--t3);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.sec-body {
+  padding-top: var(--s8);
+}
+
+@media (max-width: 800px) {
+  .sec-head {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    column-gap: var(--s4);
+    row-gap: var(--s2);
   }
-  50%,
-  100% {
-    opacity: 0;
+
+  .sec-meta {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .sec-body {
+    padding-top: var(--s6);
   }
 }
+
+/* --- buttons ------------------------------------------------------------- */
+/* No fills anywhere. Elevation carries the hierarchy, which is what keeps the
+   accent budget under 5%. */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 var(--s4);
+  font-family: var(--mono);
+  font-size: var(--fs-mono-l);
+  letter-spacing: 0.01em;
+  color: var(--t1);
+  background: transparent;
+  border: 1px solid var(--hair-2);
+  border-radius: var(--r-btn);
+  cursor: pointer;
+  transition: transform var(--t-out) var(--ease-out),
+    background-color var(--t-fast) ease, border-color var(--t-fast) ease;
+}
+
+.btn--raised {
+  background: var(--n800);
+  box-shadow: var(--lift), var(--depth);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover {
+    background: var(--n750);
+  }
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Two faces share one grid cell, so the width never jumps on state change. */
+.swap {
+  display: grid;
+  overflow: hidden;
+}
+
+.face {
+  grid-area: 1 / 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4375rem;
+  white-space: nowrap;
+  transition: transform var(--t-in) var(--ease-in),
+    opacity var(--t-in) var(--ease-in);
+}
+
+.face--done {
+  color: var(--accent);
+  transform: translateY(80%);
+  opacity: 0;
+}
+
+[data-copied='true'] .face--idle {
+  transform: translateY(-80%);
+  opacity: 0;
+}
+
+[data-copied='true'] .face--done {
+  transform: translateY(0);
+  opacity: 1;
+  transition: transform var(--t-in) var(--ease-out),
+    opacity var(--t-in) var(--ease-out);
+}
+
+.face svg {
+  display: block;
+  flex: none;
+}
+
+/* --- tags ---------------------------------------------------------------- */
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+}
+
+.tags li {
+  font-family: var(--mono);
+  font-size: var(--fs-meta);
+  line-height: 1.4;
+  color: var(--t2);
+  padding: var(--s1) var(--s2);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-chip);
+  background: var(--n850);
+  white-space: nowrap;
+}
+
+/* One of the five sanctioned accent uses. */
+.tags li.is-ai {
+  color: var(--accent);
+  border-color: var(--accent-hair);
+  background: var(--accent-well);
+}
+
+/* --- horizontal scroll container ----------------------------------------- */
+/* Wide content scrolls inside its own box so the page body never does. Used by
+   the experience table and the retrieval-path rail. */
+
+.scroller {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+
+.scroller::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 3px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* --- reduced motion ------------------------------------------------------ */
+/* Opacity and colour only, never movement. */
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
+  .btn {
+    transition: background-color var(--t-fast) ease,
+      border-color var(--t-fast) ease;
   }
-}
 
-/* ---------------------------------------------------------------- responsive */
-@media (max-width: 640px) {
-  :root {
-    --pad-x: 24px;
+  .btn:active {
+    transform: none;
+  }
+
+  .face,
+  .face--done,
+  [data-copied='true'] .face--idle,
+  [data-copied='true'] .face--done {
+    transform: none;
+    transition: opacity var(--t-fast) ease;
   }
 }

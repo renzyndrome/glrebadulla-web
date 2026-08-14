@@ -1,0 +1,1291 @@
+<title>One Accent</title>
+
+<style>
+/* ==========================================================================
+   DESIGN RATIONALE — Direction 02: MONOCHROME + ONE ACCENT
+   --------------------------------------------------------------------------
+   IDEA (one sentence)
+   A near-monochrome dark instrument panel where the craft lives entirely in
+   the border language and the interaction states, so the page demonstrates
+   engineering competence by how it behaves rather than by how it is decorated.
+
+   TYPE
+   Production faces:
+     UI / prose  "Söhne" (Klim Type Foundry), self-hosted woff2, 400/500.
+                 A grotesk with real ink and tight apertures. Chosen over
+                 Inter/Geist precisely because those two read as the default.
+     Data / meta "Berkeley Mono" (US Graphics), self-hosted woff2, 400/500.
+                 Every date, index, tag, table figure and label is mono.
+   The split is structural, not stylistic: prose is grotesk, data is mono.
+   All figures carry font-variant-numeric: tabular-nums so columns align.
+
+   Scale (sharp, with real jumps, no flat 16/18/20 mush):
+     h1        clamp(2.125rem to 3.5rem) / 1.04 / -0.028em / 500
+     lede      1.0625rem                 / 1.62 / 400
+     h2        1.5rem                    / 1.15 / -0.015em / 500
+     h3        1.125rem                  / 1.30 / 500
+     body      0.9375rem                 / 1.65
+     mono meta 0.75rem                   / 1.40 / +0.01em
+     micro     0.6875rem                 / 1.35 / +0.08em (table heads only)
+
+   NEUTRAL RAMP (5 surface steps + 4 text tiers = the entire palette)
+     --n900 #0a0a0b  page base
+     --n850 #101012  recessed / flat surface (chips, photo well, QR well)
+     --n800 #16161a  raised surface (AI panel, buttons, contact card)
+     --n750 #1c1c21  row hover surface
+     --n700 #26262c  solid detail fill (pipeline nodes)
+     --t1 #ededf0 primary · --t2 #a1a1aa secondary (7.5:1)
+     --t3 #828289 tertiary labels · --t4 aliases --t3
+     Three text tiers, not four. A tertiary grey has to clear 4.5:1 against
+     the LIGHTEST surface it ever sits on, not against the page base: on the
+     raised panel (--n800) #7c7c85 measured 4.36:1, and the original fourth
+     tier ran 3.55-3.69:1 at the 11-13px sizes it was used at. #828289 clears
+     4.5:1 on every surface in the ramp (4.73:1 on --n800, 5.19:1 on --n900),
+     so the fourth tier folded into the third. De-emphasis below this point is
+     carried by size, weight and grid position instead of by less contrast.
+
+   BORDER LANGUAGE (the key craft signal, and the reason there is no colour)
+     Not solid 1px lines. Layered translucency instead:
+       --hair   rgba(255,255,255,.06)  every divider and hairline
+       --hair-2 rgba(255,255,255,.10)  hover, detail, pressable edges
+       --lift   inset 0 1px 0 rgba(255,255,255,.05)  top-edge highlight,
+                applied ONLY to raised surfaces, so elevation is legible
+                from the light catching the top edge
+       --depth  0 1px 2px rgba(0,0,0,.4), 0 6px 16px -12px rgba(0,0,0,.9)
+                tight, low-spread, negative-spread outer shadow. Reads as a
+                lifted edge. Never a halo, never a glow, never coloured.
+     Only four elements are raised: the AI panel, the two copy buttons, the
+     WhatsApp card, the skip link. Everything else is flat with hairlines.
+
+   ACCENT RULE — #3ecf8e, one colour, under 5% of pixels.
+     Allowed on exactly five things: :focus-visible rings, the active nav
+     state, the ONE data highlight (the LLM+RAG stat), the AI/LLM tag marks
+     (three project chips, four panel chips, one panel label), and the
+     copy-button "Copied" state. Explicitly NOT on: headings, card borders,
+     section numbers, button fills, the current-role date. There are no
+     filled buttons on this page at all. Hierarchy comes from surface
+     elevation, not from colour. Chosen over the old #28c05a because it is
+     desaturated enough to sit quietly beside a neutral ramp.
+
+   SPACING RHYTHM — 4px base: 4 8 12 16 20 24 32 40 56 80 112.
+     Section rhythm 112px desktop / 56px mobile.
+     ONE vertical spine at 7.5rem + 2.5rem gutter (= 10rem). The section
+     number, the skill-group label, the project index, the post date and the
+     table's Period column all start on it. That repeated grid is the rhythm.
+
+   MOTION BUDGET — three state-change transitions, nothing else.
+     1. nav underline: scaleX from the left edge, 200ms strong ease-out in,
+        140ms ease-in out.
+     2. project row: surface + border colour (ease) and the detail arrow
+        translateX(-6px) to 0 with opacity, 200ms ease-out in / 160ms ease-in.
+     3. copy button: two faces swapped on translateY + opacity, 200ms, plus
+        scale(0.97) on :active.
+     transform / opacity / colour only. All interruptible CSS transitions.
+     Hover gated behind (hover:hover) and (pointer:fine). Everything reduced
+     to opacity-only under prefers-reduced-motion. No entrance animation, no
+     scroll reveal, no hover scale, no loops, no autoplay.
+   ========================================================================== */
+
+:root {
+  /* Söhne = production grotesk. Berkeley Mono = production mono. */
+  --sans: "Söhne", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Berkeley Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+
+  --n900: #0a0a0b;
+  --n850: #101012;
+  --n800: #16161a;
+  --n750: #1c1c21;
+  --n700: #26262c;
+
+  --t1: #ededf0;
+  --t2: #a1a1aa;
+  --t3: #828289;
+  --t4: var(--t3);
+
+  --hair: rgba(255, 255, 255, 0.06);
+  --hair-2: rgba(255, 255, 255, 0.10);
+  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --depth: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px -12px rgba(0, 0, 0, 0.9);
+
+  --accent: #3ecf8e;
+  --accent-hair: rgba(62, 207, 142, 0.24);
+  --accent-well: rgba(62, 207, 142, 0.06);
+
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+
+  --spine: 7.5rem;
+  --gutter: 2.5rem;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--n900);
+  color: var(--t1);
+  font-family: var(--sans);
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.page { background: var(--n900); min-height: 100vh; }
+
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+
+::selection { background: rgba(62, 207, 142, 0.22); color: #fff; }
+
+a { color: inherit; text-decoration: none; }
+
+h1, h2, h3, p, dl, dd, dt, ol, ul, li, figure, figcaption, table { margin: 0; padding: 0; }
+ol, ul { list-style: none; }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* --- skip link ----------------------------------------------------------- */
+.skip {
+  position: absolute; left: 20px; top: -100px; z-index: 20;
+  font-family: var(--mono); font-size: 0.75rem;
+  padding: 10px 14px; border-radius: 6px;
+  background: var(--n800); color: var(--t1);
+  border: 1px solid var(--hair-2); box-shadow: var(--lift), var(--depth);
+}
+.skip:focus { top: 12px; }
+
+/* --- shell --------------------------------------------------------------- */
+.shell { max-width: 1120px; margin: 0 auto; padding: 0 2.5rem; }
+
+/* --- header / nav -------------------------------------------------------- */
+.masthead {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--n900);
+  border-bottom: 1px solid var(--hair);
+}
+.masthead-in {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 1.25rem; min-height: 56px;
+}
+.wordmark {
+  font-family: var(--mono); font-size: 0.8125rem; font-weight: 500;
+  color: var(--t1); letter-spacing: 0.01em;
+  display: inline-flex; align-items: center; min-height: 44px;
+  white-space: nowrap;
+}
+.wordmark span { color: var(--t4); margin-left: 0.5rem; font-variant-numeric: tabular-nums; }
+
+.nav { display: flex; align-items: center; gap: 1.5rem; }
+.navlink {
+  position: relative;
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.01em;
+  color: var(--t2);
+  display: inline-flex; align-items: center;
+  min-height: 44px; padding: 0 1px;
+  white-space: nowrap;
+  transition: color 150ms ease;
+}
+.navlink .rule {
+  position: absolute; left: 0; right: 0;
+  top: calc(50% + 0.8em); height: 1px;
+  background: currentColor;
+  transform: scaleX(0); transform-origin: left center;
+  transition: transform 140ms var(--ease-in);
+}
+.navlink[aria-current="true"] { color: var(--accent); }
+.navlink[aria-current="true"] .rule { transform: scaleX(1); }
+.navlink:focus-visible .rule { transform: scaleX(1); }
+@media (hover: hover) and (pointer: fine) {
+  .navlink:hover { color: var(--t1); }
+  .navlink:hover .rule {
+    transform: scaleX(1);
+    transition: transform 200ms var(--ease-out);
+  }
+}
+.nav-full { display: flex; gap: 1.5rem; }
+@media (max-width: 800px) { .nav-full { display: none; } }
+
+/* --- hero ---------------------------------------------------------------- */
+.hero { padding: 5rem 0 3.5rem; }
+.hero-in {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 3.5rem;
+  align-items: start;
+}
+.hero-id {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.75rem;
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.01em;
+  margin-bottom: 1.75rem;
+}
+.hero-id b { font-weight: 500; color: var(--t1); }
+.hero-id em { font-style: normal; color: var(--t3); }
+
+h1 {
+  font-size: clamp(2.125rem, 4.6vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.028em;
+  font-weight: 500;
+  max-width: 22ch;
+  color: var(--t1);
+}
+.lede {
+  margin-top: 1.5rem;
+  font-size: 1.0625rem; line-height: 1.62;
+  color: var(--t2);
+  max-width: 58ch;
+}
+.hero-actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;
+  margin-top: 2.5rem;
+}
+
+/* index card: flat, hairline-ruled data. Deliberately NOT raised, so the
+   raised treatment stays reserved for things you can act on. */
+.index-card { padding-top: 0.5rem; }
+.index-card > div {
+  display: grid; grid-template-columns: 6.75rem minmax(0, 1fr);
+  gap: 1rem; padding: 0.75rem 0;
+  border-top: 1px solid var(--hair);
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+.index-card dt { color: var(--t3); }
+.index-card dd { color: var(--t1); }
+
+@media (max-width: 900px) {
+  .hero { padding: 3rem 0 2.5rem; }
+  .hero-in { grid-template-columns: minmax(0, 1fr); gap: 2.5rem; }
+}
+
+/* --- stats --------------------------------------------------------------- */
+.stats {
+  display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid var(--hair);
+}
+.stats > div {
+  display: flex; flex-direction: column-reverse; gap: 0.5rem;
+  padding: 1.75rem 1.75rem 1.75rem 0;
+  border-left: 1px solid var(--hair);
+}
+.stats > div:first-child { border-left: 0; padding-left: 0; }
+.stats > div:not(:first-child) { padding-left: 1.75rem; }
+/* fixed cap height box so the numeric and the mono value sit on one line */
+.stat-v {
+  display: flex; align-items: flex-end; min-height: 2.25rem;
+  font-size: 2.25rem; line-height: 1; font-weight: 500;
+  letter-spacing: -0.03em; color: var(--t1);
+  font-variant-numeric: tabular-nums;
+}
+/* THE single data highlight: the one non-numeric value, in mono, in accent */
+.stat-v--mark {
+  font-family: var(--mono); font-size: 1.5rem;
+  letter-spacing: -0.01em; color: var(--accent);
+}
+.stat-k {
+  font-family: var(--mono); font-size: 0.75rem; line-height: 1.45;
+  color: var(--t3);
+}
+@media (max-width: 900px) {
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .stats > div { padding: 1.375rem 1.25rem 1.375rem 0; }
+  .stats > div:not(:first-child) { padding-left: 0; border-left: 0; }
+  .stats > div:nth-child(n + 3) { border-top: 1px solid var(--hair); }
+  .stats > div:nth-child(even) {
+    border-left: 1px solid var(--hair);
+    padding-left: 1.25rem; padding-right: 0;
+  }
+  .stat-v { font-size: 1.875rem; min-height: 1.875rem; }
+  .stat-v--mark { font-size: 1.25rem; }
+}
+
+/* --- section frame ------------------------------------------------------- */
+.sec { padding: 7rem 0 0; scroll-margin-top: 72px; }
+.sec:last-of-type { padding-bottom: 7rem; }
+.sec-head {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr) auto;
+  column-gap: var(--gutter);
+  align-items: baseline;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--hair);
+}
+.sec-num {
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums; color: var(--t4);
+}
+.sec-head h2 {
+  font-size: 1.5rem; line-height: 1.15; letter-spacing: -0.015em;
+  font-weight: 500; color: var(--t1);
+}
+.sec-meta {
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums; color: var(--t3);
+  text-align: right; white-space: nowrap;
+}
+.sec-body { padding-top: 2rem; }
+
+@media (max-width: 800px) {
+  .sec { padding-top: 3.5rem; }
+  .sec:last-of-type { padding-bottom: 3.5rem; }
+  .sec-head {
+    grid-template-columns: 2rem minmax(0, 1fr);
+    column-gap: 1rem; row-gap: 0.5rem;
+  }
+  .sec-meta { grid-column: 2; text-align: left; }
+  .sec-body { padding-top: 1.5rem; }
+}
+
+/* --- about --------------------------------------------------------------- */
+.about {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr);
+  column-gap: var(--gutter);
+}
+.photo {
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  background: var(--n850);
+  display: flex; align-items: flex-end; padding: 0.75rem;
+}
+.photo span {
+  font-family: var(--mono); font-size: 0.6875rem; color: var(--t4);
+  letter-spacing: 0.02em;
+}
+.about-body p { color: var(--t2); max-width: 66ch; }
+.about-body p + p { margin-top: 1rem; }
+.about-body strong { color: var(--t1); font-weight: 500; }
+@media (max-width: 800px) {
+  .about { grid-template-columns: 6rem minmax(0, 1fr); column-gap: 1.5rem; }
+}
+@media (max-width: 480px) {
+  .about { grid-template-columns: minmax(0, 1fr); row-gap: 1.5rem; }
+  .photo { max-width: 8.5rem; }
+}
+
+/* --- AI panel: the one genuinely different treatment on the page --------- */
+.ai {
+  border: 1px solid var(--hair);
+  border-radius: 8px;
+  background: var(--n800);
+  box-shadow: var(--lift), var(--depth);
+  padding: 1.75rem;
+}
+.ai-top {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.5rem 0.75rem;
+  font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.01em;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--hair);
+}
+.ai-top b { color: var(--accent); font-weight: 500; }
+.ai-top em { font-style: normal; color: var(--t3); }
+.ai h3 {
+  font-size: 1.125rem; line-height: 1.3; font-weight: 500;
+  letter-spacing: -0.01em; margin-top: 1.5rem; max-width: 46ch;
+}
+.ai > p { color: var(--t2); margin-top: 0.75rem; max-width: 62ch; }
+.ai .tags { margin-top: 1.5rem; }
+@media (max-width: 560px) { .ai { padding: 1.25rem; } }
+
+.scroller {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.14) transparent;
+}
+.scroller::-webkit-scrollbar { height: 6px; }
+.scroller::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14); border-radius: 3px;
+}
+.scroller::-webkit-scrollbar-track { background: transparent; }
+
+/* hairline-drawn retrieval path. No icons, no imagery: a rule and five nodes */
+.pipe { margin-top: 2rem; }
+.pipe-rail { display: flex; min-width: 33rem; padding-bottom: 0.5rem; }
+.pipe-rail li {
+  flex: 1 1 0; min-width: 6.25rem; position: relative;
+  padding: 1rem 1rem 0 0;
+  border-top: 1px solid var(--hair-2);
+}
+.pipe-rail li::before {
+  content: ""; position: absolute; top: -3px; left: 0;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--n700); box-shadow: 0 0 0 1px var(--hair-2);
+}
+.pipe-rail li:last-child { flex: 0 0 auto; min-width: 4.75rem; padding-right: 0; }
+.pipe-rail li:last-child::after {
+  content: ""; position: absolute; top: -3px; right: 0;
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--n700); box-shadow: 0 0 0 1px var(--hair-2);
+}
+.pipe-i {
+  display: block; font-family: var(--mono); font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums; color: var(--t4);
+  letter-spacing: 0.05em; margin-bottom: 0.25rem;
+}
+.pipe-l { display: block; font-family: var(--mono); font-size: 0.8125rem; color: var(--t1); }
+.pipe figcaption {
+  font-size: 0.875rem; color: var(--t3); margin-top: 1.25rem; max-width: 62ch;
+}
+
+/* --- tags / chips -------------------------------------------------------- */
+.tags { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+.tags li {
+  font-family: var(--mono); font-size: 0.75rem; line-height: 1.4;
+  color: var(--t2);
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--hair);
+  border-radius: 4px;
+  background: var(--n850);
+  white-space: nowrap;
+}
+.tags li.is-ai {
+  color: var(--accent);
+  border-color: var(--accent-hair);
+  background: var(--accent-well);
+}
+
+/* --- skill rows ---------------------------------------------------------- */
+.skills { margin-top: 2.5rem; }
+.skills > div {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr);
+  column-gap: var(--gutter);
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--hair);
+  align-items: start;
+}
+.skills dt { font-family: var(--mono); font-size: 0.8125rem; color: var(--t1); }
+.skills dt small {
+  display: block; font-size: 0.6875rem; color: var(--t4);
+  margin-top: 0.375rem; letter-spacing: 0.01em;
+}
+@media (max-width: 800px) {
+  .skills > div { grid-template-columns: minmax(0, 1fr); row-gap: 0.875rem; }
+}
+
+/* --- dense project rows (no card wall) ----------------------------------- */
+/* hairlines live on the <li> so they align with every other rule on the page;
+   the hover surface lives on the <a> and bleeds 1rem past them on purpose. */
+.rows { border-bottom: 1px solid var(--hair); }
+.rows > li {
+  border-top: 1px solid var(--hair);
+  transition: border-color 180ms var(--ease-in);
+}
+/* the section-head rule already closes the top edge: never double a hairline */
+.rows > li:first-child, .posts > li:first-child { border-top: 0; }
+.row {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr) minmax(0, 13rem) 1.5rem;
+  column-gap: var(--gutter);
+  align-items: start;
+  margin: 0 -1rem;
+  padding: 1.375rem 1rem;
+  border-radius: 6px;
+  transition: background-color 180ms var(--ease-in);
+}
+.row-i {
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums; color: var(--t4);
+  padding-top: 0.1875rem;
+}
+.row-name {
+  font-family: var(--mono); font-size: 0.9375rem; font-weight: 500;
+  color: var(--t1); letter-spacing: -0.005em; line-height: 1.4;
+}
+.row-d { font-size: 0.875rem; color: var(--t2); margin-top: 0.375rem; max-width: 52ch; }
+.row-tags { padding-top: 0.1875rem; }
+.row-go {
+  font-family: var(--mono); font-size: 0.875rem; color: var(--accent);
+  justify-self: end; padding-top: 0.125rem;
+  opacity: 0; transform: translateX(-6px);
+  transition: opacity 160ms var(--ease-in), transform 160ms var(--ease-in);
+}
+@media (hover: hover) and (pointer: fine) {
+  .row:hover { background: var(--n750); }
+  .rows > li:has(.row:hover) { border-top-color: var(--hair-2); }
+  .row:hover .row-go {
+    opacity: 1; transform: translateX(0);
+    transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+  }
+}
+.row:focus-visible { background: var(--n750); outline-offset: 3px; }
+.row:focus-visible .row-go {
+  opacity: 1; transform: translateX(0);
+  transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out);
+}
+@media (max-width: 960px) {
+  .row {
+    grid-template-columns: 2.5rem minmax(0, 1fr) 1.5rem;
+    column-gap: 1.25rem; row-gap: 0.75rem;
+  }
+  .row-tags { grid-column: 2; grid-row: 2; }
+  .row-go { grid-column: 3; grid-row: 1; }
+}
+
+/* --- experience: real tabular data, in a real table ---------------------- */
+.xp { width: 100%; border-collapse: collapse; min-width: 40rem; }
+.xp th {
+  text-align: left; font-weight: 400;
+  font-family: var(--mono); font-size: 0.6875rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: var(--t4); padding: 0 1.5rem 0.875rem 0;
+}
+.xp td {
+  padding: 1.25rem 1.5rem 1.25rem 0;
+  border-top: 1px solid var(--hair); vertical-align: top;
+}
+.xp th:first-child, .xp td:first-child { width: 10rem; padding-right: var(--gutter); }
+.xp-when {
+  font-family: var(--mono); font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums; color: var(--t2); white-space: nowrap;
+}
+.xp tbody tr:first-child .xp-when { color: var(--t1); }
+.xp-role { display: block; font-size: 0.9375rem; font-weight: 500; color: var(--t1); }
+.xp-note { font-size: 0.875rem; color: var(--t3); margin-top: 0.375rem; max-width: 40ch; }
+.xp-org { display: block; font-size: 0.9375rem; color: var(--t2); }
+.xp-org small {
+  display: block; font-family: var(--mono); font-size: 0.6875rem;
+  color: var(--t4); margin-top: 0.25rem;
+}
+.xp-stack {
+  display: block; font-family: var(--mono); font-size: 0.75rem;
+  color: var(--t3); line-height: 1.55;
+}
+/* the table keeps its real semantics and scrolls; say so where it matters */
+.scroll-hint { display: none; }
+@media (max-width: 800px) {
+  .scroll-hint {
+    display: block; font-family: var(--mono); font-size: 0.6875rem;
+    color: var(--t4); margin-top: 0.875rem;
+  }
+}
+
+/* --- writing ------------------------------------------------------------- */
+.posts { border-bottom: 1px solid var(--hair); }
+.post {
+  display: grid;
+  grid-template-columns: var(--spine) minmax(0, 1fr);
+  column-gap: var(--gutter);
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--hair);
+  align-items: baseline;
+}
+.post time {
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums; color: var(--t4);
+}
+.post h3 {
+  font-size: 1.0625rem; font-weight: 500; letter-spacing: -0.01em;
+  color: var(--t1); line-height: 1.35;
+  transition: color 150ms ease;
+}
+.post p { font-size: 0.875rem; color: var(--t2); margin-top: 0.375rem; max-width: 62ch; }
+@media (max-width: 800px) {
+  .post { grid-template-columns: minmax(0, 1fr); row-gap: 0.5rem; }
+}
+
+/* --- buttons: no fills anywhere. Elevation carries the hierarchy. -------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 0 1rem;
+  font-family: var(--mono); font-size: 0.8125rem; letter-spacing: 0.01em;
+  color: var(--t1); background: transparent;
+  border: 1px solid var(--hair-2); border-radius: 6px;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out), background-color 150ms ease,
+    border-color 150ms ease;
+}
+.btn--raised { background: var(--n800); box-shadow: var(--lift), var(--depth); }
+@media (hover: hover) and (pointer: fine) {
+  .btn:hover { background: var(--n750); }
+}
+.btn:active { transform: scale(0.97); }
+
+/* two-face swap. Both faces share one grid cell, so the width never jumps. */
+.swap { display: grid; overflow: hidden; }
+.face {
+  grid-area: 1 / 1;
+  display: inline-flex; align-items: center; gap: 0.4375rem;
+  white-space: nowrap;
+  transition: transform 200ms var(--ease-in), opacity 200ms var(--ease-in);
+}
+.face--done { color: var(--accent); transform: translateY(80%); opacity: 0; }
+[data-copied="true"] .face--idle { transform: translateY(-80%); opacity: 0; }
+[data-copied="true"] .face--done {
+  transform: translateY(0); opacity: 1;
+  transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out);
+}
+.face svg { display: block; flex: none; }
+
+/* --- contact ------------------------------------------------------------- */
+.contact {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 4rem; align-items: start;
+}
+.contact > div > p { color: var(--t2); max-width: 52ch; }
+.contact-actions {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+/* underline hugs the text via text-decoration, not a border on a 44px box */
+.mailto {
+  font-family: var(--mono); font-size: 0.8125rem; color: var(--t2);
+  text-decoration: underline; text-decoration-color: var(--hair-2);
+  text-decoration-thickness: 1px; text-underline-offset: 4px;
+  display: inline-flex; align-items: center; min-height: 44px;
+  transition: color 150ms ease, text-decoration-color 150ms ease;
+}
+.elsewhere {
+  display: flex; flex-wrap: wrap; gap: 0 1.75rem;
+  margin-top: 1.5rem; padding-top: 0.75rem;
+  border-top: 1px solid var(--hair);
+}
+.elsewhere a {
+  font-family: var(--mono); font-size: 0.75rem; color: var(--t3);
+  display: inline-flex; align-items: center; min-height: 44px;
+  transition: color 150ms ease;
+}
+@media (hover: hover) and (pointer: fine) {
+  .mailto:hover { color: var(--t1); text-decoration-color: var(--t3); }
+  .elsewhere a:hover { color: var(--t1); }
+  .post:hover h3 { color: #fff; }
+}
+
+.wa {
+  border: 1px solid var(--hair); border-radius: 8px;
+  background: var(--n800); box-shadow: var(--lift), var(--depth);
+  padding: 1.25rem; text-align: center;
+}
+.qr {
+  position: relative; display: block; width: 128px; height: 128px;
+  border: 1px solid var(--hair); border-radius: 6px; background: var(--n850);
+}
+.qr i {
+  position: absolute; width: 26px; height: 26px;
+  border: 3px solid rgba(255, 255, 255, 0.14); border-radius: 2px;
+}
+.qr i::after {
+  content: ""; position: absolute; inset: 5px;
+  background: rgba(255, 255, 255, 0.14); border-radius: 1px;
+}
+.qr i:nth-child(1) { top: 14px; left: 14px; }
+.qr i:nth-child(2) { top: 14px; right: 14px; }
+.qr i:nth-child(3) { bottom: 14px; left: 14px; }
+.wa-label {
+  display: inline-block; font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--t2); margin-top: 0.875rem;
+  border-bottom: 1px solid var(--hair-2); padding-bottom: 2px;
+  transition: color 150ms ease;
+}
+@media (hover: hover) and (pointer: fine) { .wa a:hover .wa-label { color: var(--t1); } }
+.wa-note {
+  font-family: var(--mono); font-size: 0.6875rem; color: var(--t4);
+  margin-top: 0.625rem;
+}
+@media (max-width: 900px) {
+  .contact { grid-template-columns: minmax(0, 1fr); row-gap: 2.5rem; }
+  .wa { justify-self: start; }
+}
+
+/* --- footer -------------------------------------------------------------- */
+/* hairline aligns with every other rule on the page: shell content width */
+.foot {
+  border-top: 1px solid var(--hair);
+  padding: 1.75rem 0 3rem;
+  display: flex; flex-wrap: wrap; gap: 0.75rem 1.5rem;
+  justify-content: space-between;
+  font-family: var(--mono); font-size: 0.75rem;
+  font-variant-numeric: tabular-nums; color: var(--t4);
+}
+
+@media (max-width: 560px) {
+  .shell { padding: 0 1.25rem; }
+  .foot { padding: 1.5rem 0 2.5rem; }
+}
+
+/* --- reduced motion: opacity and colour only, never movement ------------- */
+@media (prefers-reduced-motion: reduce) {
+  .navlink .rule {
+    transform: scaleX(1); opacity: 0;
+    transition: opacity 120ms ease;
+  }
+  .navlink:hover .rule,
+  .navlink:focus-visible .rule,
+  .navlink[aria-current="true"] .rule { opacity: 1; transform: scaleX(1); }
+
+  .row-go,
+  .row:hover .row-go,
+  .row:focus-visible .row-go { transform: none; transition: opacity 150ms ease; }
+
+  .btn { transition: background-color 150ms ease, border-color 150ms ease; }
+  .btn:active { transform: none; }
+
+  .face,
+  .face--done,
+  [data-copied="true"] .face--idle,
+  [data-copied="true"] .face--done { transform: none; transition: opacity 150ms ease; }
+}
+</style>
+
+<div class="page">
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+    <div class="shell masthead-in">
+      <a class="wordmark" href="#top">Laurence Rebadulla <span>PH · UTC+8</span></a>
+      <nav class="nav" aria-label="Sections">
+        <div class="nav-full">
+          <a class="navlink" href="#about">About<span class="rule" aria-hidden="true"></span></a>
+          <a class="navlink" href="#skills">Capabilities<span class="rule" aria-hidden="true"></span></a>
+          <a class="navlink" href="#work" aria-current="true">Work<span class="rule" aria-hidden="true"></span></a>
+          <a class="navlink" href="#experience">Experience<span class="rule" aria-hidden="true"></span></a>
+          <a class="navlink" href="#writing">Writing<span class="rule" aria-hidden="true"></span></a>
+        </div>
+        <a class="navlink" href="#contact">Contact<span class="rule" aria-hidden="true"></span></a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero" id="top">
+      <div class="shell hero-in">
+        <div>
+          <p class="hero-id">
+            <b>Laurence Rebadulla</b>
+            <em>Senior Software Engineer | AI Developer</em>
+          </p>
+          <h1>I ship production software. Then I make it intelligent.</h1>
+          <p class="lede">
+            9 years building web applications and backend systems in Python, Django,
+            FastAPI, TypeScript and React. Recent focus: LLM integration and RAG
+            pipelines in production.
+          </p>
+          <div class="hero-actions">
+            <button
+              class="btn btn--raised"
+              type="button"
+              id="copy-email"
+              data-email="glrebadulla@gmail.com"
+              data-copied="false"
+            >
+              <span class="swap">
+                <span class="face face--idle">Copy email</span>
+                <span class="face face--done" aria-hidden="true">
+                  <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <path d="M2 6.4 4.6 9 10 3.2" stroke="currentColor" stroke-width="1.6"
+                      stroke-linecap="square" />
+                  </svg>Copied
+                </span>
+              </span>
+            </button>
+            <a class="btn" href="/uploads/latest-cv.pdf" download>Download CV</a>
+          </div>
+          <p class="sr-only" id="copy-status" aria-live="polite"></p>
+        </div>
+
+        <dl class="index-card">
+          <div><dt>status</dt><dd>open to work</dd></div>
+          <div><dt>location</dt><dd>Philippines · remote</dd></div>
+          <div><dt>timezone</dt><dd>UTC+8</dd></div>
+          <div><dt>focus</dt><dd>LLM integration · RAG</dd></div>
+          <div><dt>shipping since</dt><dd>2018</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <div class="shell">
+      <dl class="stats">
+        <div>
+          <dt class="stat-k">years shipping software</dt>
+          <dd class="stat-v">9+</dd>
+        </div>
+        <div>
+          <dt class="stat-k">industries: media, health, government, telecom</dt>
+          <dd class="stat-v">4</dd>
+        </div>
+        <div>
+          <dt class="stat-k">integration and retrieval pipelines in production</dt>
+          <dd class="stat-v stat-v--mark">LLM+RAG</dd>
+        </div>
+        <div>
+          <dt class="stat-k">remote with international teams since 2023</dt>
+          <dd class="stat-v">100%</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- 01 · about -->
+    <section class="sec" id="about">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">01</span>
+          <h2>End-to-end ownership, minimal supervision.</h2>
+          <span class="sec-meta">Philippines · UTC+8</span>
+        </header>
+        <div class="sec-body about">
+          <div
+            class="photo"
+            role="img"
+            aria-label="Portrait of Laurence Rebadulla, placeholder for /images/me.jpg"
+          >
+            <span>photo · me.jpg</span>
+          </div>
+          <div class="about-body">
+            <p>
+              I build features end to end: database design, APIs, frontend, and deployment
+              on AWS. I've shipped products in media, telehealth, government and telecom.
+            </p>
+            <p>
+              These days I add LLM features through the OpenAI API and retrieval pipelines
+              with embeddings and LangChain, so products
+              <strong>answer from their own data</strong> instead of generic model output.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02 · capabilities, AI first -->
+    <section class="sec" id="skills">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">02</span>
+          <h2>Capabilities</h2>
+          <span class="sec-meta">6 groups</span>
+        </header>
+        <div class="sec-body">
+          <div class="ai">
+            <p class="ai-top">
+              <b>ai / llm</b>
+              <em>primary focus · running in production</em>
+            </p>
+            <h3>LLM features that answer from your own data.</h3>
+            <p>
+              RAG pipelines and OpenAI features that answer from your data instead of
+              guessing. Already running in tools a content team uses every day.
+            </p>
+
+            <figure class="pipe">
+              <div class="scroller">
+                <ol class="pipe-rail">
+                  <li><span class="pipe-i">01</span><span class="pipe-l">question</span></li>
+                  <li><span class="pipe-i">02</span><span class="pipe-l">embed</span></li>
+                  <li><span class="pipe-i">03</span><span class="pipe-l">retrieve</span></li>
+                  <li><span class="pipe-i">04</span><span class="pipe-l">ground</span></li>
+                  <li><span class="pipe-i">05</span><span class="pipe-l">answer</span></li>
+                </ol>
+              </div>
+              <figcaption>
+                The retrieval path behind those features. OpenAI embeddings build the index,
+                LangChain orchestrates the lookup, and every answer is tied back to the
+                company's own records.
+              </figcaption>
+            </figure>
+
+            <ul class="tags" aria-label="AI and LLM stack">
+              <li class="is-ai">OpenAI API</li>
+              <li class="is-ai">embeddings + retrieval (RAG)</li>
+              <li class="is-ai">LangChain</li>
+              <li class="is-ai">Claude Code</li>
+            </ul>
+          </div>
+
+          <dl class="skills">
+            <div>
+              <dt>Languages</dt>
+              <dd>
+                <ul class="tags">
+                  <li>Python</li><li>TypeScript</li><li>JavaScript</li><li>SQL</li>
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt>Backend <small>APIs that hold up under real load</small></dt>
+              <dd>
+                <ul class="tags">
+                  <li>Django</li><li>DRF</li><li>FastAPI</li><li>Flask</li>
+                  <li>Node.js</li><li>Celery</li><li>Redis</li><li>REST design</li>
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt>Frontend <small>typed React interfaces that load fast</small></dt>
+              <dd>
+                <ul class="tags">
+                  <li>React</li><li>Next.js</li><li>TanStack Start</li>
+                  <li>TanStack Router</li><li>TanStack Query</li><li>Vite</li>
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt>Cloud, DevOps <small>deployed, monitored and scaled</small></dt>
+              <dd>
+                <ul class="tags">
+                  <li>AWS EC2</li><li>S3</li><li>Lambda</li><li>RDS</li>
+                  <li>API Gateway</li><li>CloudWatch</li><li>Docker</li><li>Linux</li>
+                  <li>CI/CD</li><li>Cloudflare Workers + R2</li>
+                </ul>
+              </dd>
+            </div>
+            <div>
+              <dt>Databases <small>the right store for the job</small></dt>
+              <dd>
+                <ul class="tags">
+                  <li>PostgreSQL</li><li>MySQL</li><li>MongoDB</li>
+                  <li>Firebase</li><li>Supabase</li>
+                </ul>
+              </dd>
+            </div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 · selected work -->
+    <section class="sec" id="work">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">03</span>
+          <h2>Selected work</h2>
+          <span class="sec-meta">6 projects</span>
+        </header>
+        <div class="sec-body">
+          <ol class="rows">
+            <li>
+              <a class="row" href="/projects/rag-analytics-assistant">
+                <span class="row-i">01</span>
+                <div>
+                  <h3 class="row-name">rag-analytics-assistant</h3>
+                  <p class="row-d">
+                    Plain-language search over company analytics. Retrieval pipelines with
+                    OpenAI embeddings and LangChain ground every answer in real company data.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li class="is-ai">LangChain</li><li class="is-ai">OpenAI</li><li>FastAPI</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+            <li>
+              <a class="row" href="/projects/llm-content-tools">
+                <span class="row-i">02</span>
+                <div>
+                  <h3 class="row-name">llm-content-tools</h3>
+                  <p class="row-d">
+                    LLM features in internal tools via the OpenAI API: content suggestions,
+                    automated reports, and plain-language search that cut manual work for the
+                    content team.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li class="is-ai">OpenAI API</li><li>Python</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+            <li>
+              <a class="row" href="/projects/creator-analytics-dashboard">
+                <span class="row-i">03</span>
+                <div>
+                  <h3 class="row-name">creator-analytics-dashboard</h3>
+                  <p class="row-d">
+                    Real-time revenue, engagement and growth tracking with automated Telegram
+                    and Discord alerts. The content team uses it daily instead of pulling
+                    reports by hand.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li>Python</li><li>AWS</li><li>Telegram · Discord API</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+            <li>
+              <a class="row" href="/projects/telehealth-platform">
+                <span class="row-i">04</span>
+                <div>
+                  <h3 class="row-name">telehealth-platform</h3>
+                  <p class="row-d">
+                    Employees book and meet mental-health practitioners over live chat, voice
+                    and video. Built with Python, Django REST, React and Next.js on AWS.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li>Django REST</li><li>Next.js</li><li>AWS</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+            <li>
+              <a class="row" href="/projects/e-legislative-system">
+                <span class="row-i">05</span>
+                <div>
+                  <h3 class="row-name">e-legislative-system</h3>
+                  <p class="row-d">
+                    Moved local government legislative work online: bill drafting, committee
+                    deliberation, and public hearings. Built with Python, Django, and React
+                    on AWS.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li>Django</li><li>React</li><li>AWS</li><li>Docker</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+            <li>
+              <a class="row" href="/projects/carrier-api-platform">
+                <span class="row-i">06</span>
+                <div>
+                  <h3 class="row-name">carrier-api-platform</h3>
+                  <p class="row-d">
+                    Public developer APIs for one of the largest PH telecoms. Businesses
+                    integrate carrier-level features (SMS, voice, location, rewards,
+                    geofencing, USSD) into their websites, mobile apps, and software systems.
+                  </p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    <li>Flask</li><li>Node.js</li><li>AWS</li>
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 · experience -->
+    <section class="sec" id="experience">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">04</span>
+          <h2>Experience</h2>
+          <span class="sec-meta">2018 to present</span>
+        </header>
+        <div class="sec-body">
+          <div class="scroller">
+            <table class="xp">
+              <caption class="sr-only">Professional experience, most recent first</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Period</th>
+                  <th scope="col">Role</th>
+                  <th scope="col">Organization</th>
+                  <th scope="col">Stack</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="xp-when">2024 — present</span></td>
+                  <td>
+                    <span class="xp-role">Senior Full Stack Developer</span>
+                    <p class="xp-note">
+                      LLM features via OpenAI API, retrieval pipelines, real-time analytics,
+                      social automation.
+                    </p>
+                  </td>
+                  <td><span class="xp-org">US-based Media Company<small>remote</small></span></td>
+                  <td><span class="xp-stack">Python · FastAPI · React · AWS</span></td>
+                </tr>
+                <tr>
+                  <td><span class="xp-when">2023 — 2024</span></td>
+                  <td>
+                    <span class="xp-role">Senior Full Stack Developer</span>
+                    <p class="xp-note">
+                      Telehealth platform with live chat, voice and video.
+                    </p>
+                  </td>
+                  <td><span class="xp-org">Connect Psych Services<small>remote</small></span></td>
+                  <td><span class="xp-stack">Django REST · React · Next.js · AWS</span></td>
+                </tr>
+                <tr>
+                  <td><span class="xp-when">2020 — 2023</span></td>
+                  <td>
+                    <span class="xp-role">Software Developer to Senior</span>
+                    <p class="xp-note">
+                      Led the E-Legislative System for local government. Odoo CRM, Website
+                      and HRIS. Promoted for technical leadership.
+                    </p>
+                  </td>
+                  <td><span class="xp-org">LITS<small>Philippines</small></span></td>
+                  <td><span class="xp-stack">Django · React · Odoo · AWS</span></td>
+                </tr>
+                <tr>
+                  <td><span class="xp-when">2018 — 2019</span></td>
+                  <td>
+                    <span class="xp-role">Junior Software Engineer</span>
+                    <p class="xp-note">
+                      Public developer APIs for one of the largest PH telecoms.
+                    </p>
+                  </td>
+                  <td><span class="xp-org">Infoshift Inc.<small>Philippines</small></span></td>
+                  <td><span class="xp-stack">Flask · Node.js · AWS microservices</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="scroll-hint">Scroll the table for organization and stack &#8594;</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 05 · writing -->
+    <section class="sec" id="writing">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">05</span>
+          <h2>Writing</h2>
+          <span class="sec-meta">2 posts</span>
+        </header>
+        <div class="sec-body">
+          <ol class="posts">
+            <li>
+              <a class="post" href="/blog/from-writing-code-to-directing-ai">
+                <time datetime="2026-07-13">2026-07-13</time>
+                <div>
+                  <h3>From writing code to directing AI</h3>
+                  <p>
+                    My last role integrating AI changed how I see the job. The future is less
+                    about writing every line and more about directing AI to solve real
+                    business problems.
+                  </p>
+                </div>
+              </a>
+            </li>
+            <li>
+              <a class="post" href="/blog/build-for-yourself-first">
+                <time datetime="2026-07-06">2026-07-06</time>
+                <div>
+                  <h3>Build for yourself first</h3>
+                  <p>
+                    I build tools to make my own life easier before I build them for anyone
+                    else. If something genuinely solves my problem, it usually solves someone
+                    else's too.
+                  </p>
+                </div>
+              </a>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </section>
+
+    <!-- 06 · contact -->
+    <section class="sec" id="contact">
+      <div class="shell">
+        <header class="sec-head">
+          <span class="sec-num">06</span>
+          <h2>Let's build something.</h2>
+          <span class="sec-meta">open to work</span>
+        </header>
+        <div class="sec-body contact">
+          <div>
+            <p>
+              Available for senior full-stack and AI integration work. Email me, or scan the
+              code to open a WhatsApp chat directly.
+            </p>
+            <div class="contact-actions">
+              <button
+                class="btn btn--raised"
+                type="button"
+                id="copy-email-2"
+                data-email="glrebadulla@gmail.com"
+                data-copied="false"
+              >
+                <span class="swap">
+                  <span class="face face--idle">Copy email</span>
+                  <span class="face face--done" aria-hidden="true">
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                      <path d="M2 6.4 4.6 9 10 3.2" stroke="currentColor" stroke-width="1.6"
+                        stroke-linecap="square" />
+                    </svg>Copied
+                  </span>
+                </span>
+              </button>
+              <a class="mailto" href="mailto:glrebadulla@gmail.com">glrebadulla@gmail.com</a>
+            </div>
+            <nav class="elsewhere" aria-label="Elsewhere">
+              <a href="https://github.com/renzyndrome">github/renzyndrome</a>
+              <a href="https://linkedin.com/in/laurencerebadulla">linkedin/laurencerebadulla</a>
+              <a href="https://glrebadulla.dev">glrebadulla.dev</a>
+              <a href="/uploads/latest-cv.pdf" download>latest-cv.pdf</a>
+            </nav>
+          </div>
+
+          <div class="wa">
+            <a
+              href="https://wa.me/639171477836"
+              aria-label="Open a WhatsApp chat with Laurence Rebadulla"
+            >
+              <span class="qr" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span class="wa-label">wa.me/639171477836</span>
+            </a>
+            <p class="wa-note">QR placeholder · /wa-qr.png</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell">
+      <div class="foot">
+        <span>&#169; 2026 Laurence Rebadulla · Philippines (remote, UTC+8)</span>
+        <span>Senior Software Engineer | AI Developer</span>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  var statusEl = document.getElementById('copy-status');
+  var timer;
+  function wireCopy(btn) {
+    if (!btn) return;
+    btn.addEventListener('click', function () {
+      var email = btn.dataset.email;
+      if (navigator.clipboard) navigator.clipboard.writeText(email).catch(function () {});
+      document.querySelectorAll('[data-copied]').forEach(function (b) {
+        b.dataset.copied = 'false';
+      });
+      btn.dataset.copied = 'true';
+      statusEl.textContent = email + ' copied to clipboard';
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        btn.dataset.copied = 'false';
+        statusEl.textContent = '';
+      }, 1800);
+    });
+  }
+  wireCopy(document.getElementById('copy-email'));
+  wireCopy(document.getElementById('copy-email-2'));
+</script>

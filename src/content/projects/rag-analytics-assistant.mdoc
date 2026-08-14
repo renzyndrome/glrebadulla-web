@@ -1,29 +1,42 @@
 ---
 name: rag-analytics-assistant
 order: 10
-icon: retrieval
 description: Plain-language search over company analytics. Retrieval pipelines with OpenAI embeddings + LangChain ground every answer in real company data.
 chips:
   - label: LangChain
     ai: true
-  - label: OpenAI
+  - label: LLM integration
     ai: true
   - label: FastAPI
     ai: false
 ---
 
-## What it does
+## The problem
 
-Ask a question in plain language and get an answer drawn from the company's own
-analytics, not a generic guess from the model.
+The analytics already existed. Getting an answer out of them meant knowing where to
+look, so questions queued up behind whoever knew the schema. Most of those questions
+were small and repetitive, which is the worst kind of thing to be a bottleneck for.
 
-## Approach
+## How it works
 
-A retrieval pipeline embeds the source data, pulls the passages most relevant to
-each question, and grounds the model's answer in those passages. Every answer can
-be traced back to real records instead of invented ones.
+Company data is split into chunks and embedded with the OpenAI embeddings API, and the
+vectors are stored so a question can be matched by similarity. At query time the
+service embeds the question, pulls the passages that score highest, and passes only
+those to the model as context. LangChain wires the steps together.
+
+Retrieval quality mattered far more than prompt wording. Chunks that were too large
+buried the relevant line in noise, and chunks that were too small lost the context
+that made a number mean anything. Finding that boundary, and keeping metadata attached
+to each chunk so the model could tell what it was looking at, is where most of the
+time went.
+
+## Keeping the answers honest
+
+An assistant that invents a plausible number is worse than one that declines to
+answer, because a plausible number gets used. Answers are grounded in the retrieved
+passages and carry a reference back to the records they came from, so anyone can check
+the work. When retrieval turns up nothing relevant, saying so is the correct output.
 
 ## Stack
 
-Python and FastAPI on the backend, OpenAI embeddings for retrieval, and LangChain
-to orchestrate the pipeline.
+Python and FastAPI, OpenAI embeddings for retrieval, LangChain for orchestration.

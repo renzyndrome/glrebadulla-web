@@ -1,33 +1,22 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import ChromeBar from '../components/ChromeBar.astro';
-import SiteNav from '../components/SiteNav.astro';
+import PageShell from '../layouts/PageShell.astro';
 import Hero from '../components/Hero.astro';
 import StatsStrip from '../components/StatsStrip.astro';
 import AboutSection from '../components/AboutSection.astro';
 import SkillsSection from '../components/SkillsSection.astro';
 import ProjectsSection from '../components/ProjectsSection.astro';
 import ExperienceSection from '../components/ExperienceSection.astro';
+import WritingSection from '../components/WritingSection.astro';
 import ContactSection from '../components/ContactSection.astro';
-import SiteFooter from '../components/SiteFooter.astro';
 ---
 
-<Layout>
-  <a class="skip-link" href="#main">skip to content</a>
-  <div class="terminal">
-    <header>
-      <ChromeBar />
-      <SiteNav />
-    </header>
-    <main id="main">
-      <Hero />
-      <StatsStrip />
-      <AboutSection imageSrc="/images/me.jpg" />
-      <SkillsSection />
-      <ProjectsSection />
-      <ExperienceSection />
-      <ContactSection />
-    </main>
-    <SiteFooter />
-  </div>
-</Layout>
+<PageShell>
+  <Hero />
+  <StatsStrip />
+  <AboutSection />
+  <SkillsSection />
+  <ProjectsSection />
+  <ExperienceSection />
+  <WritingSection />
+  <ContactSection />
+</PageShell>

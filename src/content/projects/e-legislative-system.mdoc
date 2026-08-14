@@ -1,7 +1,6 @@
 ---
 name: e-legislative-system
 order: 50
-icon: legislative
 description: "Moved local government legislative work online: bill drafting, committee deliberation, and public hearings. Built with Python, Django, and React on AWS."
 chips:
   - label: Django
@@ -14,17 +13,37 @@ chips:
     ai: false
 ---
 
-## What it does
+I led development on this one.
 
-An e-legislative system that moved a local government's legislative process
-online, covering bill drafting, committee deliberation, and public hearings.
+## The problem
 
-## Approach
+A local government's legislative process ran on paper and in meetings: drafting a
+measure, moving it through committee, holding public hearings, recording what was
+decided. The process itself was well understood by the people running it. It was also
+slow, almost impossible to search, and easy to lose the thread of.
 
-Led development end to end, replacing manual, paper-based steps with tracked
-digital workflows for each stage of legislation.
+## It is a state machine, not a set of forms
+
+The temptation with government workflow software is to build forms that mirror the
+paperwork. The actual requirement is a state machine. A measure moves through defined
+stages, only certain roles can move it between them, and every transition needs to be
+recorded with who did it and when. Once that was modelled honestly, most of the screens
+became obvious.
+
+Getting the stages right meant sitting with how the office already worked instead of
+designing a tidier process and expecting people to adopt it. Software that does not
+match the real procedure gets worked around, and then the official record is wrong,
+which is worse than the paper it replaced.
+
+## Audit trail and access
+
+Legislative work keeps a paper trail for good reasons, so the digital version keeps one
+too. Document versions are retained rather than overwritten, and actions are attributed.
+Access is role-based, because a draft sitting in committee and a measure that has passed
+are not the same document and should not have the same audience.
 
 ## Stack
 
-Python and Django on the backend, React on the frontend, containerized with
-Docker and deployed on AWS.
+Python and Django, React on the front, containerised with Docker and deployed on AWS.
+In the same role I also customised Odoo Enterprise to deliver CRM, website and HRIS
+modules that replaced manual processes.

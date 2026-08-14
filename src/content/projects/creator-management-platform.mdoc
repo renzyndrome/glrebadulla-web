@@ -1,0 +1,64 @@
+---
+name: creator-management-platform
+order: 35
+description: "A platform the content team runs creators from: content scheduling, post management and mass messaging, wired straight into the social platform APIs it posts to."
+chips:
+  - label: React
+    ai: false
+  - label: TypeScript
+    ai: false
+  - label: FastAPI
+    ai: false
+  - label: Google APIs
+    ai: false
+---
+
+Co-built with another engineer.
+
+## The problem
+
+Running creators meant a spreadsheet for the schedule, a separate tool for posting, and
+manual copy and paste for anything that went to more than one person. None of those
+steps were difficult. There were just a lot of them, and every handoff between tools
+was somewhere for work to quietly go missing.
+
+## One data model, two workflows
+
+Scheduling and mass messaging were the things the team did constantly, so the data model
+was built around them from the start rather than fitted around them later. A post has an
+explicit lifecycle, and the state it is in is a real field rather than something inferred
+from whether a timestamp happens to be null. That distinction sounds pedantic right up
+until someone asks why a post did not go out and you need to answer precisely.
+
+## Typed end to end
+
+React and TypeScript on the front, FastAPI behind it, with response shapes and component
+props kept in agreement. On a small team moving quickly, this is the cheapest way to
+discover that a field was renamed. The compiler tells you before a user does.
+
+## Living on other people's APIs
+
+Scheduling a post is only useful if it actually reaches the platform, so the service
+talks directly to the social media APIs rather than handing someone a reminder to go and
+do it. Each platform has its own auth, its own rate limits and its own opinion about what
+a valid post looks like, so the integration layer normalises them behind one internal
+interface. When a platform changes its rules, there is one place to fix.
+
+Google APIs carry the other half. Spreadsheets was already where the team kept plans and
+reporting, so rather than forcing everyone into a new tool the platform reads and writes
+those sheets directly, and Drive holds the assets that go out with a post. Meeting people
+in the tools they already trust removed more friction than any feature I could have added
+inside the app.
+
+## Mass messaging is a partial failure problem
+
+Sending to many recipients never fully succeeds or fully fails. Some sends go through,
+some get rate limited, some bounce, and the person who pressed the button needs to know
+which is which. Sends are queued and tracked per recipient, so retrying hits the ones
+that did not land instead of duplicating the ones that did. Nobody wants to explain a
+double send.
+
+## Stack
+
+React and TypeScript on the front, FastAPI behind it, integrated with the social media
+platform APIs and Google APIs (Spreadsheets and Drive), deployed on AWS.

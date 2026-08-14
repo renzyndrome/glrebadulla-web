@@ -1,51 +1,135 @@
-/*
- * Design tokens — glrebadulla.dev "Terminal Dark Green".
- * Source of truth: design handoff skills/design-tokens.md + README.md.
- * Palette is FIXED — do not add colors or gradients (except the hero radial overlay).
- */
+/* ==========================================================================
+   Design tokens — "One Accent" system.
+   Ported from design/mockups/02-monochrome-accent.html (the approved spec).
+
+   THE IDEA: a near-monochrome dark surface where the craft lives in the border
+   language and the interaction states, not in decoration. Colour is spent in
+   one place; hierarchy comes from surface elevation and type scale.
+
+   NEUTRAL RAMP — 5 surface steps, 3 text tiers. This is the entire palette.
+     --n900 page base · --n850 recessed (chips, wells) · --n800 raised
+     (AI panel, buttons, contact card) · --n750 row hover · --n700 detail fill
+
+   TEXT TIERS — three, not four. A tertiary grey has to clear WCAG AA 4.5:1
+   against the LIGHTEST surface it ever sits on, not against the page base.
+   During the mockup audit #7c7c85 measured 4.36:1 on --n800 and a fourth tier
+   ran 3.55-3.69:1 at the 11-13px sizes it was used at, so both folded into
+   --t3 #828289 (4.73:1 on --n800, 5.19:1 on --n900). De-emphasis below this
+   point is carried by size, weight and grid position, never by less contrast.
+
+   BORDER LANGUAGE — the key craft signal, and the reason there is no colour.
+   Not solid 1px lines: layered translucency. --lift catches light on the top
+   edge so elevation is legible; --depth is tight and negative-spread so it
+   reads as a lifted edge. Never a halo, never a glow, never coloured.
+
+   ACCENT RULE — #3ecf8e, under 5% of pixels. Allowed on exactly five things:
+   :focus-visible rings, the active nav state, the ONE data highlight (the
+   LLM+RAG stat), the AI/LLM tag marks, and the copy-button "Copied" state.
+   NOT on headings, card borders, section numbers, button fills, or the
+   current-role date. There are no filled buttons anywhere on this site.
+
+   MOTION BUDGET — three state-change transitions total: nav underline,
+   project-row hover, copy-button swap. Nothing animates on load.
+   ========================================================================== */
+
 :root {
-  /* --- palette --- */
-  --bg: #050807;              /* page background (near-black green) */
-  --bg-panel: #0a0f0b;        /* cards, chrome bar, contact band */
-  --text: #dbe5df;            /* headings, primary text */
-  --text-secondary: #8a988f;  /* body copy, descriptions */
-  --text-muted: #6b7a71;      /* labels, captions, # comments */
-  --text-faint: #4a5750;      /* footer */
-  --accent: #28c05a;          /* terminal green — prompts, links, primary buttons, highlights */
-  --accent-soft: #7fe6a3;     /* text on green-tinted chips */
-  --accent-border: rgba(40, 192, 90, 0.38);      /* featured-card / chip borders */
-  --accent-border-chip: rgba(40, 192, 90, 0.4);  /* featured skill chips (README 0.4) */
-  --accent-tint: rgba(40, 192, 90, 0.12);        /* chip backgrounds */
+  /* --- type families ---------------------------------------------------- */
+  /* Two families, split strictly by job: grotesk for prose and headings,
+     mono for every date, index, tag, label and table figure. */
+  --sans: 'Schibsted Grotesk', system-ui, -apple-system, 'Helvetica Neue',
+    Arial, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo,
+    monospace;
 
-  /* --- hairlines (white at low alpha) --- */
-  --hairline: rgba(255, 255, 255, 0.07);         /* section / card borders */
-  --hairline-soft: rgba(255, 255, 255, 0.06);    /* footer top border */
-  --hairline-frame: rgba(255, 255, 255, 0.12);   /* photo frame */
-  --hairline-chip: rgba(255, 255, 255, 0.06);    /* neutral project chips bg */
-  --hairline-hatch: rgba(255, 255, 255, 0.05);   /* photo placeholder hatch */
-  --hairline-hatch-project: rgba(255, 255, 255, 0.04); /* screenshot placeholder hatch */
-  --border-btn: rgba(255, 255, 255, 0.2);        /* secondary button border */
-  --border-btn-hover: rgba(255, 255, 255, 0.4);  /* secondary button hover border */
+  /* --- surfaces --------------------------------------------------------- */
+  --n900: #0a0a0b;
+  --n850: #101012;
+  --n800: #16161a;
+  --n750: #1c1c21;
+  --n700: #26262c;
 
-  /* --- macOS window traffic lights --- */
-  --chrome-red: #ff5f56;
-  --chrome-yellow: #ffbd2e;
-  --chrome-green: #27c93f;
+  /* --- text tiers ------------------------------------------------------- */
+  --t1: #ededf0;
+  --t2: #a1a1aa;
+  --t3: #828289;
 
-  /* --- layout --- */
-  --container: 1240px;   /* max content width, centered */
-  --pad-x: 48px;         /* section side padding (overridden to 24px ≤640px) */
+  /* --- borders and elevation -------------------------------------------- */
+  --hair: rgba(255, 255, 255, 0.06);
+  --hair-2: rgba(255, 255, 255, 0.1);
+  --lift: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --depth: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 16px -12px rgba(0, 0, 0, 0.9);
 
-  /* --- radii --- */
+  /* --- accent ----------------------------------------------------------- */
+  --accent: #3ecf8e;
+  --accent-hair: rgba(62, 207, 142, 0.24);
+  --accent-well: rgba(62, 207, 142, 0.06);
+  --accent-select: rgba(62, 207, 142, 0.22);
+
+  /* --- type scale ------------------------------------------------------- */
+  /* Real jumps, no in-between sizes. The old token file had no scale at all,
+     which is why every component carried literal font shorthands. */
+  --fs-micro: 0.6875rem; /* 11px — table column heads, captions */
+  --fs-meta: 0.75rem; /* 12px — mono metadata, tags, nav */
+  --fs-mono-l: 0.8125rem; /* 13px — mono labels, buttons, dates */
+  --fs-sm: 0.875rem; /* 14px — secondary prose, row descriptions */
+  --fs-body: 0.9375rem; /* 15px — body */
+  --fs-lede: 1.0625rem; /* 17px — lede, post titles */
+  --fs-h3: 1.125rem; /* 18px */
+  --fs-h2: 1.5rem; /* 24px */
+  --fs-stat: 2.25rem; /* 36px */
+  --fs-h1: clamp(2.125rem, 4.6vw, 3.5rem);
+
+  --lh-tight: 1.15;
+  --lh-heading: 1.35;
+  --lh-body: 1.65;
+
+  /* --- spacing scale (4px base) ----------------------------------------- */
+  --s1: 0.25rem;
+  --s2: 0.5rem;
+  --s3: 0.75rem;
+  --s4: 1rem;
+  --s5: 1.25rem;
+  --s6: 1.5rem;
+  --s7: 1.75rem;
+  --s8: 2rem;
+  --s10: 2.5rem;
+  --s12: 3rem;
+  --s14: 3.5rem;
+  --s20: 5rem;
+  --s28: 7rem;
+
+  /* --- layout ----------------------------------------------------------- */
+  --container: 1120px;
+  --pad-x: 2.5rem;
+  /* The vertical spine. Section numbers, skill labels, project indices, post
+     dates and the experience table's Period column all start here. That
+     repeated grid is the page's rhythm. */
+  --spine: 7.5rem;
+  --gutter: 2.5rem;
+  --section-rhythm: var(--s28);
+
+  /* --- radii ------------------------------------------------------------ */
   --r-btn: 6px;
   --r-card: 8px;
-  --r-project: 10px;
-  --r-qr: 12px;
   --r-chip: 4px;
+  --r-focus: 3px;
 
-  /* --- type --- */
-  --font: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* --- motion ----------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --t-fast: 150ms;
+  --t-in: 200ms;
+  --t-out: 140ms;
+}
 
-  /* --- motion --- */
-  --hover: 0.15s ease;   /* 150ms hover transitions */
+@media (max-width: 560px) {
+  :root {
+    --pad-x: 1.25rem;
+  }
+}
+
+@media (max-width: 800px) {
+  :root {
+    --section-rhythm: var(--s14);
+  }
 }

@@ -1,0 +1,721 @@
+<title>Reading Room</title>
+
+<style>
+/* =============================================================================
+   DIRECTION 03 — QUIET EDITORIAL (light)
+   -----------------------------------------------------------------------------
+   THE IDEA
+   One column of prose and dated text lists on warm paper. There are no cards,
+   no panels, no nav bar and no chrome: the whole design is the type scale, the
+   measure, the baseline rhythm, and a single mono gutter that carries the key
+   for every row on the page (date, ordinal, category, channel). Structure comes
+   from a two-level hanging indent, not from boxes.
+
+   TYPE FACES (2 families, no more)
+   - Prose + headings: TIEMPOS TEXT (Klim Type Foundry) — production licence.
+     Chosen because it is a high-contrast text serif cut specifically for long
+     reading at small sizes: it keeps sturdy stems at 18px on off-white paper,
+     where a display serif (Playfair, Instrument) goes brittle. Fallback chain
+     lands on Source Serif 4 / Charter / Iowan Old Style / Georgia, all of which
+     share Tiempos' large x-height so the 34rem measure holds either way.
+   - Metadata only: BERKELEY MONO — dates, ordinals, tech names, footer.
+     Small, tabular figures, never used for prose.
+
+   TYPE SCALE (5 steps, real jumps: x1.44 / x1.17 / x1.43 / x1.50)
+     13px mono  row keys, tech metadata, positioning line, captions, footer
+     18px serif body prose, list descriptions, contact values      (lh 30)
+     21px serif lede paragraph + every list entry title, w600      (lh 36)
+     30px serif section headings, w600, tracking -0.015em          (lh 36)
+     45px serif the name, w600, tracking -0.022em                  (lh 48)
+   Hierarchy is size + weight + ink/gray only. No colour, no uppercase
+   tracking, no eyebrow labels above sections.
+
+   PALETTE (light, warm; ONE hue on the page)
+     paper       #fdfcfa   warm off-white, never clinical white
+     fill        #f2efe8   image placeholder only
+     ink         #16150f   headings, entry titles, figures, AI tech names
+     warm gray   #4b4740   prose and descriptions            (8.9:1 on paper)
+     warm muted  #6e6859   mono metadata                     (5.4:1 on paper)
+     link        #1d5b57   ink-teal — the ONLY colour, links only (7.5:1)
+     rule        rgba(22,21,15,.11) / .07  hairlines
+   Accent rule: colour marks links and nothing else. AI/LLM tech is
+   distinguished from plain tech by ink vs muted, never by a coloured chip.
+
+   RHYTHM — baseline unit 6px. Body sets 18/30 (5 units); paragraph spacing is
+   exactly one line (30px) so prose stays on baseline. Every vertical value is a
+   multiple of 6: row padding 24, heading-to-note 18, heading-to-list 30, tech
+   metadata 12, section gap 108 (72 on mobile), page top 96 (60 on mobile).
+   Two documented exceptions to the 6px grid, both optical rather than metric:
+   (1) mono row keys carry an 8px shift so their baseline lands on the 21px
+   title's baseline (7px against an 18px value, 14px in contact where the tap
+   padding moves the value down); (2) small mono links take 7px/11px vertical
+   padding purely to reach a 44px tap target.
+
+   BORDERS — hairlines exist only between rows inside a list, plus one above the
+   footer. Sections are separated by space alone. No box, no shadow, no radius
+   above 2px.
+
+   MOTION BUDGET — one transition: 120ms ease on link underline colour (and on
+   entry-title colour, same curve). Nothing else animates. Zero JavaScript.
+
+   MEASURE — prose is capped at 34rem (~64ch at 18px). hanging-punctuation is on,
+   headings use text-wrap:balance, prose uses text-wrap:pretty.
+   ========================================================================== */
+
+:root {
+  --paper: #fdfcfa;
+  --fill: #f2efe8;
+  --ink: #16150f;
+  --gray: #4b4740;
+  --muted: #6e6859;
+  --link: #1d5b57;
+  --link-soft: rgba(29, 91, 87, .34);
+  --rule: rgba(22, 21, 15, .11);
+  --rule-soft: rgba(22, 21, 15, .07);
+
+  /* Production face: Tiempos Text (Klim). System fallbacks share its x-height. */
+  --serif: "Tiempos Text", "Source Serif 4", Charter, "Iowan Old Style", Georgia, "Times New Roman", serif;
+  /* Production face: Berkeley Mono. */
+  --mono: "Berkeley Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+
+  --u: 6px;            /* baseline unit */
+  --gutter: 7.5rem;    /* mono key column */
+  --gap: 2rem;
+  --measure: 34rem;    /* ~64ch of 18px serif */
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  margin: 0;
+}
+
+.page {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--serif);
+  font-size: 18px;
+  line-height: 30px;
+  font-weight: 400;
+  hanging-punctuation: first last;
+  text-rendering: optimizeLegibility;
+}
+
+.wrap {
+  max-width: 43.5rem;                        /* gutter + gap + measure */
+  margin: 0 auto;
+  padding: calc(var(--u) * 16) 24px calc(var(--u) * 8);
+}
+
+/* ---------- links: the only colour on the page ---------------------------- */
+
+a {
+  color: var(--link);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: .18em;
+  text-decoration-color: var(--link-soft);
+  transition: text-decoration-color 120ms ease;
+}
+a:hover { text-decoration-color: currentColor; }
+a:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Entry titles stay ink until hover, so the lists do not read as a wall of
+   teal. Hover reveals both the colour and the underline. */
+.t a {
+  color: var(--ink);
+  text-decoration-color: transparent;
+  transition: color 120ms ease, text-decoration-color 120ms ease;
+}
+.t a:hover { color: var(--link); text-decoration-color: var(--link-soft); }
+
+@media (prefers-reduced-motion: reduce) {
+  a, .t a { transition: none; }
+}
+
+/* ---------- masthead ------------------------------------------------------ */
+
+h1 {
+  font-family: var(--serif);
+  font-size: clamp(2rem, 9vw, 2.8125rem);   /* 32 -> 45px */
+  line-height: 48px;
+  font-weight: 600;
+  letter-spacing: -.022em;
+  margin: 0;
+  text-wrap: balance;
+}
+
+.role {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--muted);
+  margin: calc(var(--u) * 2) 0 0;
+}
+
+.lede {
+  font-size: 21px;
+  line-height: 36px;
+  color: var(--ink);
+  max-width: var(--measure);
+  margin: calc(var(--u) * 7) 0 0;
+  text-wrap: pretty;
+}
+
+p.body {
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--gray);
+  max-width: var(--measure);
+  margin: 30px 0 0;
+  text-wrap: pretty;
+}
+
+/* stats as one small mono line, figures in ink */
+.stats {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--muted);
+  max-width: var(--measure);
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  margin: 30px 0 0;
+  padding: 0;
+}
+.stats li + li::before {
+  content: "·";
+  color: var(--rule);
+  padding: 0 .55em;
+}
+.stats b { font-weight: 400; color: var(--ink); }
+
+.jump {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  margin: calc(var(--u) * 3) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+}
+.jump li + li::before {
+  content: "·";
+  color: var(--rule);
+  padding: 0 .55em;
+}
+
+/* ---------- inline photo figure ------------------------------------------ */
+
+figure {
+  margin: calc(var(--u) * 8) 0 0;
+  width: 180px;
+}
+.ph {
+  width: 180px;
+  height: 222px;
+  background: var(--fill);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+figcaption {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  margin-top: var(--u);
+  width: 17rem;
+  max-width: 100%;
+}
+
+/* ---------- sections ----------------------------------------------------- */
+
+section { margin-top: calc(var(--u) * 18); }   /* 108px */
+
+h2 {
+  font-family: var(--serif);
+  font-size: 30px;
+  line-height: 36px;
+  font-weight: 600;
+  letter-spacing: -.015em;
+  color: var(--ink);
+  margin: 0 0 30px;
+  text-wrap: balance;
+}
+
+.note {
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--gray);
+  max-width: var(--measure);
+  margin: -12px 0 30px;
+  text-wrap: pretty;
+}
+
+/* ---------- the keyed row: mono gutter + serif column -------------------- */
+
+.list { list-style: none; margin: 0; padding: 0; }
+
+.row {
+  display: grid;
+  grid-template-columns: var(--gutter) minmax(0, 1fr);
+  column-gap: var(--gap);
+  padding: calc(var(--u) * 4) 0;
+  border-top: 1px solid var(--rule-soft);
+}
+.list > .row:first-child,
+.dl > .row:first-child { border-top: 1px solid var(--rule); }
+.list > .row:last-child,
+.dl > .row:last-child { border-bottom: 1px solid var(--rule); }
+
+.k {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums lining-nums;
+  color: var(--muted);
+  padding-top: 8px;            /* optical: mono baseline onto 21px baseline */
+  white-space: nowrap;
+}
+.dl .k { padding-top: 7px; }   /* against an 18px value line */
+
+.t {
+  font-size: 21px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  color: var(--ink);
+  margin: 0;
+}
+.org {
+  font-size: 18px;
+  line-height: 30px;
+  font-style: italic;
+  color: var(--gray);
+  margin: 0;
+}
+.d {
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--gray);
+  max-width: var(--measure);
+  margin: calc(var(--u) * 1) 0 0;
+  text-wrap: pretty;
+}
+.tech {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--muted);
+  margin: calc(var(--u) * 2) 0 0;
+}
+/* AI / LLM tech is marked by ink weight, not by a coloured chip */
+.tech .ai { color: var(--ink); }
+
+/* skills read as definitions: mono key, serif value */
+.dl { margin: 0; }
+.dl dd { margin: 0; }
+.v {
+  font-size: 18px;
+  line-height: 30px;
+  color: var(--ink);
+}
+.v .sep { color: var(--rule); padding: 0 .18em; }
+/* the qualifying sentence under a skills value */
+.v .d { display: block; }
+
+/* ---------- contact ------------------------------------------------------ */
+
+.cv { font-size: 18px; line-height: 30px; margin: 0; overflow-wrap: break-word; }
+.cv a { display: inline-block; padding: 7px 0; }   /* >=44px tap target */
+/* the 7px tap padding pushes the value baseline down; keep the key on it */
+#contact .dl .k { padding-top: 14px; }
+.cv .sep { color: var(--rule); padding: 0 .25em; }
+.cv .meta {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--muted);
+  display: block;
+}
+
+.qr {
+  width: 112px;
+  height: 112px;
+  background: var(--fill);
+  border: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: calc(var(--u) * 2);
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+/* ---------- footer ------------------------------------------------------- */
+
+footer {
+  margin-top: calc(var(--u) * 18);
+  padding-top: calc(var(--u) * 4);
+  border-top: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 22px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.5rem;
+  justify-content: space-between;
+}
+footer p { margin: 0; }
+
+/* ---------- 390px: the gutter stacks, nothing else changes --------------- */
+
+@media (max-width: 40rem) {
+  .wrap { padding: calc(var(--u) * 10) 24px calc(var(--u) * 6); }
+  section { margin-top: calc(var(--u) * 12); }   /* 72px */
+  footer { margin-top: calc(var(--u) * 12); }
+  h1 { line-height: 40px; }
+  .lede { font-size: 20px; line-height: 32px; }
+  .row { grid-template-columns: minmax(0, 1fr); }
+  /* selectors matched to the desktop key rules so the stack resets cleanly */
+  .row .k, .dl .k, #contact .dl .k {
+    padding-top: 0;
+    margin-bottom: var(--u);
+    white-space: normal;
+  }
+  /* 13px mono links need real tap area: 22px line + 22px padding = 44px */
+  .jump a, footer a { display: inline-block; padding: 11px 0; }
+  .jump { margin-top: var(--u); }
+  .jump li + li::before, .stats li + li::before { padding: 0 .4em; }
+  figure, .ph { width: 160px; }
+  .ph { height: 198px; }
+}
+</style>
+
+<div class="page">
+<main class="wrap">
+
+  <header>
+    <h1>Laurence Rebadulla</h1>
+    <p class="role">Senior Software Engineer | AI Developer</p>
+
+    <p class="lede">Nine years of building web applications and backend systems,
+    mostly Python and TypeScript. What I do now is narrower and more interesting:
+    adding LLM features and retrieval pipelines to software that is already in
+    production, so it answers from a company's own data instead of generic model
+    output.</p>
+
+    <p class="body">I build features end to end. Database design, APIs, frontend,
+    and deployment on AWS. I have shipped products in media, telehealth,
+    government and telecom, usually as the person who owns the whole path from
+    schema to production. These days that path ends with the OpenAI API,
+    embeddings and LangChain.</p>
+
+    <p class="body">I work remotely from the Philippines on UTC+8 and have been
+    on international teams since 2023. I am open to senior full stack and AI
+    integration work. If you have a product that should be answering questions it
+    currently cannot, that is the conversation I want.</p>
+
+    <ul class="stats">
+      <li><b>9+</b> years shipping software</li>
+      <li><b>4</b> industries: media, health, government, telecom</li>
+      <li><b>LLM + RAG</b> in production</li>
+      <li><b>100%</b> remote since 2023</li>
+    </ul>
+
+    <figure>
+      <!-- Placeholder. In production this is /images/me.jpg, 180px wide. -->
+      <div class="ph" role="img" aria-label="Placeholder for a photograph of Laurence Rebadulla">photo</div>
+      <figcaption>Laurence Rebadulla. Philippines, remote, UTC+8. Open to work.</figcaption>
+    </figure>
+
+    <ul class="jump">
+      <li><a href="#work">work</a></li>
+      <li><a href="#experience">experience</a></li>
+      <li><a href="#skills">skills</a></li>
+      <li><a href="#writing">writing</a></li>
+      <li><a href="#contact">contact</a></li>
+    </ul>
+  </header>
+
+  <section id="work">
+    <h2>Selected work</h2>
+    <p class="note">Ordered by impact rather than by date. Tech set in ink is the
+    AI and retrieval layer.</p>
+
+    <ol class="list">
+      <li class="row">
+        <div class="k">01</div>
+        <div>
+          <p class="t"><a href="/projects/rag-analytics-assistant">rag-analytics-assistant</a></p>
+          <p class="d">Plain-language search over company analytics. Retrieval
+          pipelines with OpenAI embeddings and LangChain ground every answer in
+          real company data.</p>
+          <p class="tech"><span class="ai">LangChain</span> · <span class="ai">OpenAI</span> · FastAPI</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">02</div>
+        <div>
+          <p class="t"><a href="/projects/llm-content-tools">llm-content-tools</a></p>
+          <p class="d">LLM features in internal tools via the OpenAI API. Content
+          suggestions, automated reports, and plain-language search that cut
+          manual work for the content team.</p>
+          <p class="tech"><span class="ai">OpenAI API</span> · Python</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">03</div>
+        <div>
+          <p class="t"><a href="/projects/creator-analytics-dashboard">creator-analytics-dashboard</a></p>
+          <p class="d">Real-time revenue, engagement and growth tracking with
+          automated Telegram and Discord alerts. The content team uses it daily
+          instead of pulling reports by hand.</p>
+          <p class="tech">Python · AWS · Telegram · Discord API</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">04</div>
+        <div>
+          <p class="t"><a href="/projects/telehealth-platform">telehealth-platform</a></p>
+          <p class="d">Employees book and meet mental-health practitioners over
+          live chat, voice and video. Built with Python, Django REST, React and
+          Next.js on AWS.</p>
+          <p class="tech">Django REST · Next.js · AWS</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">05</div>
+        <div>
+          <p class="t"><a href="/projects/e-legislative-system">e-legislative-system</a></p>
+          <p class="d">Moved local government legislative work online: bill
+          drafting, committee deliberation, and public hearings. Built with
+          Python, Django and React on AWS.</p>
+          <p class="tech">Django · React · AWS · Docker</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">06</div>
+        <div>
+          <p class="t"><a href="/projects/carrier-api-platform">carrier-api-platform</a></p>
+          <p class="d">Public developer APIs for one of the largest PH telecoms.
+          Businesses integrate carrier-level features (SMS, voice, location,
+          rewards, geofencing, USSD) into their websites, mobile apps and
+          software systems.</p>
+          <p class="tech">Flask · Node.js · AWS</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section id="experience">
+    <h2>Experience</h2>
+
+    <ol class="list">
+      <li class="row">
+        <div class="k">2024 — present</div>
+        <div>
+          <p class="t">Senior Full Stack Developer</p>
+          <p class="org">US-based media company, remote</p>
+          <p class="d">LLM features via the OpenAI API, retrieval pipelines,
+          real-time analytics and social automation.</p>
+          <p class="tech">Python · FastAPI · React · AWS</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">2023 — 2024</div>
+        <div>
+          <p class="t">Senior Full Stack Developer</p>
+          <p class="org">Connect Psych Services, remote</p>
+          <p class="d">Telehealth platform with live chat, voice and video.</p>
+          <p class="tech">Django REST · React · Next.js · AWS</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">2020 — 2023</div>
+        <div>
+          <p class="t">Software Developer to Senior</p>
+          <p class="org">LITS</p>
+          <p class="d">Led the E-Legislative System for local government, plus
+          Odoo CRM, Website and HRIS work. Promoted for technical leadership.</p>
+          <p class="tech">Django · React · Odoo · AWS</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">2018 — 2019</div>
+        <div>
+          <p class="t">Junior Software Engineer</p>
+          <p class="org">Infoshift Inc.</p>
+          <p class="d">Public developer APIs for one of the largest PH
+          telecoms.</p>
+          <p class="tech">Flask · Node.js · AWS microservices</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section id="skills">
+    <h2>Skills</h2>
+
+    <dl class="dl list">
+      <div class="row">
+        <dt class="k">ai / llm</dt>
+        <dd class="v">
+          OpenAI API <span class="sep">·</span> embeddings and retrieval (RAG)
+          <span class="sep">·</span> LangChain <span class="sep">·</span> Claude Code
+          <span class="d">RAG pipelines and OpenAI features
+          that answer from your data instead of guessing. Already running in tools
+          a content team uses every day.</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">backend</dt>
+        <dd class="v">
+          Django <span class="sep">·</span> DRF <span class="sep">·</span> FastAPI
+          <span class="sep">·</span> Flask <span class="sep">·</span> Node.js
+          <span class="sep">·</span> Celery <span class="sep">·</span> Redis
+          <span class="sep">·</span> REST design
+          <span class="d">APIs that hold up under real load.</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">frontend</dt>
+        <dd class="v">
+          React <span class="sep">·</span> Next.js <span class="sep">·</span>
+          TanStack (Start, Router, Query) <span class="sep">·</span> Vite
+          <span class="d">Typed React interfaces that load fast.</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">cloud / devops</dt>
+        <dd class="v">
+          AWS (EC2, S3, Lambda, RDS, API Gateway, CloudWatch)
+          <span class="sep">·</span> Docker <span class="sep">·</span> Linux
+          <span class="sep">·</span> CI/CD <span class="sep">·</span> Cloudflare
+          Workers and R2
+          <span class="d">Deployed, monitored and scaled.</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">databases</dt>
+        <dd class="v">
+          PostgreSQL <span class="sep">·</span> MySQL <span class="sep">·</span>
+          MongoDB <span class="sep">·</span> Firebase <span class="sep">·</span> Supabase
+          <span class="d">The right store for the job.</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">languages</dt>
+        <dd class="v">
+          Python <span class="sep">·</span> TypeScript <span class="sep">·</span>
+          JavaScript <span class="sep">·</span> SQL
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section id="writing">
+    <h2>Writing</h2>
+
+    <ol class="list">
+      <li class="row">
+        <div class="k">2026-07-13</div>
+        <div>
+          <p class="t"><a href="/blog/from-writing-code-to-directing-ai">From writing code to directing AI</a></p>
+          <p class="d">My last role integrating AI changed how I see the job. The
+          future is less about writing every line and more about directing AI to
+          solve real business problems.</p>
+        </div>
+      </li>
+
+      <li class="row">
+        <div class="k">2026-07-06</div>
+        <div>
+          <p class="t"><a href="/blog/build-for-yourself-first">Build for yourself first</a></p>
+          <p class="d">I build tools to make my own life easier before I build
+          them for anyone else. If something genuinely solves my problem, it
+          usually solves someone else's too.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section id="contact">
+    <h2>Contact</h2>
+    <p class="note">Available for senior full-stack and AI integration work.
+    Email me, or scan the code to open a WhatsApp chat directly.</p>
+
+    <dl class="dl list">
+      <div class="row">
+        <dt class="k">email</dt>
+        <dd class="cv">
+          <a href="mailto:glrebadulla@gmail.com">glrebadulla@gmail.com</a>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">whatsapp</dt>
+        <dd class="cv">
+          <a href="https://wa.me/639171477836">wa.me/639171477836</a>
+          <!-- Placeholder. In production this is /wa-qr.png at 180x180. -->
+          <div class="qr" role="img" aria-label="Placeholder for the WhatsApp QR code">WhatsApp QR</div>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">cv</dt>
+        <dd class="cv">
+          <a href="/uploads/latest-cv.pdf" download="Laurence Rebadulla - Senior Software Engineer AI Developer CV.pdf">Download the CV</a>
+          <span class="meta">PDF · Senior Software Engineer, AI Developer</span>
+        </dd>
+      </div>
+
+      <div class="row">
+        <dt class="k">elsewhere</dt>
+        <dd class="cv">
+          <a href="https://github.com/renzyndrome">github</a><span class="sep">·</span>
+          <a href="https://linkedin.com/in/laurencerebadulla">linkedin</a><span class="sep">·</span>
+          <a href="https://glrebadulla.dev">glrebadulla.dev</a>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <footer>
+    <p>© 2026 Laurence Rebadulla · Philippines (remote, UTC+8)</p>
+    <p><a href="#work">back to work</a></p>
+  </footer>
+
+</main>
+</div>

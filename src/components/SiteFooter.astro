@@ -1,18 +1,39 @@
 ---
-// Footer. The faint --text-faint color fails AA contrast — this is an accepted
-// design tradeoff (do not alter the palette to "fix" it).
+// Footer. The hairline aligns with every other rule on the page because it sits
+// inside the same shell measure.
+import { profile } from '../data/profile';
+
+const year = new Date().getFullYear();
 ---
 
-<footer class="footer pad-x">
-  © 2026 Laurence Rebadulla · Philippines (remote, UTC+8) · exit 0
+<footer>
+  <div class="shell">
+    <div class="foot">
+      <span>
+        © {year} {profile.name} · {profile.location} (remote, {profile.timezone})
+      </span>
+      <span>{profile.title}</span>
+    </div>
+  </div>
 </footer>
 
 <style>
-  .footer {
-    padding-top: 18px;
-    padding-bottom: 18px;
-    font: 400 12px var(--font);
-    color: var(--text-faint);
-    border-top: 1px solid var(--hairline-soft);
+  .foot {
+    border-top: 1px solid var(--hair);
+    padding: var(--s7) 0 var(--s12);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s3) var(--s6);
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: var(--fs-meta);
+    font-variant-numeric: tabular-nums;
+    color: var(--t3);
+  }
+
+  @media (max-width: 560px) {
+    .foot {
+      padding: var(--s6) 0 var(--s10);
+    }
   }
 </style>

@@ -1,5 +1,4 @@
 import { config, fields, collection } from '@keystatic/core';
-import { GLYPH_OPTIONS, DEFAULT_GLYPH } from './src/lib/projectGlyphs';
 
 // Local storage: the admin UI (dev only, at /keystatic) reads/writes content
 // files directly in this repo. Commit the changes and Cloudflare rebuilds the
@@ -9,7 +8,7 @@ import { GLYPH_OPTIONS, DEFAULT_GLYPH } from './src/lib/projectGlyphs';
 export default config({
   storage: { kind: 'local' },
   ui: {
-    brand: { name: 'glrebadulla.com' },
+    brand: { name: 'glrebadulla.dev' },
   },
   collections: {
     // Projects — data-only YAML files: src/content/projects/<slug>.yaml
@@ -46,17 +45,10 @@ export default config({
             itemLabel: (props) => props.fields.label.value,
           }
         ),
-        icon: fields.select({
-          label: 'Card glyph',
-          description:
-            'Terminal ASCII motif shown on the card (used unless a screenshot is set).',
-          options: GLYPH_OPTIONS,
-          defaultValue: DEFAULT_GLYPH,
-        }),
         image: fields.text({
           label: 'Screenshot path (optional)',
           description:
-            'Public path to an original screenshot, e.g. /images/projects/foo.png. When set, it overrides the glyph.',
+            'Public path to an original, permission-cleared screenshot, e.g. /images/projects/foo.png. Leave empty for NDA work: the detail page then shows the NDA note instead.',
         }),
         content: fields.markdoc({
           label: 'Detail page content',

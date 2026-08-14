@@ -1,95 +1,108 @@
 ---
-// Stats strip — 4 hairline-divided columns. Only `LLM+RAG` is green (accent
-// discipline: exactly one highlighted stat).
-const stats = [
-  { value: '9+', caption: 'years shipping software' },
-  { value: '4', caption: 'industries: media · health · gov · telecom' },
-  {
-    value: 'LLM+RAG',
-    caption: 'integration & retrieval pipelines in production',
-    accent: true,
-  },
-  { value: '100%', caption: 'remote with intl teams since 2023' },
-];
+// Four hairline-divided cells. The value sits below the caption in source order
+// (a <dl> reads key then value) but renders above it via column-reverse, so the
+// number leads visually while the markup stays semantic.
+import { stats } from '../data/stats';
 ---
 
-<section class="stats" aria-label="Highlights">
-  <dl class="stats-grid">
+<div class="shell">
+  <dl class="stats" aria-label="Highlights">
     {
       stats.map((s) => (
-        <div class="stat">
-          <dt class:list={['stat-value', { 'stat-value--accent': s.accent }]}>
-            {s.value}
-          </dt>
-          <dd class="stat-caption">{s.caption}</dd>
+        <div>
+          <dt class="stat-k">{s.caption}</dt>
+          <dd class:list={['stat-v', { 'stat-v--mark': s.mark }]}>{s.value}</dd>
         </div>
       ))
     }
   </dl>
-</section>
+</div>
 
 <style>
-  .stats-grid {
+  .stats {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    margin: 0;
-    border-top: 1px solid var(--hairline);
-    border-bottom: 1px solid var(--hairline);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--hair);
   }
 
-  .stat {
-    padding: 26px 40px;
-    border-right: 1px solid var(--hairline);
+  .stats > div {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--s2);
+    padding: var(--s7) var(--s7) var(--s7) 0;
+    border-left: 1px solid var(--hair);
   }
 
-  .stat:last-child {
-    border-right: none;
+  .stats > div:first-child {
+    border-left: 0;
+    padding-left: 0;
   }
 
-  .stat-value {
-    font: 600 28px var(--font);
-    color: var(--text);
+  .stats > div:not(:first-child) {
+    padding-left: var(--s7);
   }
 
-  .stat-value--accent {
+  /* Fixed min-height so the numeric values and the shorter mono value sit on
+     one optical line. */
+  .stat-v {
+    display: flex;
+    align-items: flex-end;
+    min-height: var(--fs-stat);
+    font-size: var(--fs-stat);
+    line-height: 1;
+    font-weight: 500;
+    letter-spacing: -0.03em;
+    color: var(--t1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* THE single data highlight on the page: the one non-numeric value, in mono,
+     in the accent. One of the five sanctioned accent uses. */
+  .stat-v--mark {
+    font-family: var(--mono);
+    font-size: var(--fs-h2);
+    letter-spacing: -0.01em;
     color: var(--accent);
   }
 
-  .stat-caption {
-    margin: 4px 0 0;
-    font: 400 11.5px var(--font);
-    color: var(--text-muted);
+  .stat-k {
+    font-family: var(--mono);
+    font-size: var(--fs-meta);
+    line-height: 1.45;
+    color: var(--t3);
   }
 
-  /* ≤1024px: 2×2 grid; internal hairlines rebuilt for two columns. */
-  @media (max-width: 1024px) {
-    .stats-grid {
-      grid-template-columns: repeat(2, 1fr);
+  @media (max-width: 900px) {
+    .stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .stat {
-      border-right: 1px solid var(--hairline);
-      border-bottom: 1px solid var(--hairline);
+    .stats > div {
+      padding: var(--s5) var(--s5) var(--s5) 0;
     }
 
-    /* right column: no right border */
-    .stat:nth-child(2n) {
-      border-right: none;
+    .stats > div:not(:first-child) {
+      padding-left: 0;
+      border-left: 0;
     }
 
-    /* bottom row: no bottom border (outer border handles it) */
-    .stat:nth-last-child(-n + 2) {
-      border-bottom: none;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .stat {
-      padding: 22px 24px;
+    .stats > div:nth-child(n + 3) {
+      border-top: 1px solid var(--hair);
     }
 
-    .stat-value {
-      font-size: 24px;
+    .stats > div:nth-child(even) {
+      border-left: 1px solid var(--hair);
+      padding-left: var(--s5);
+      padding-right: 0;
+    }
+
+    .stat-v {
+      font-size: 1.875rem;
+      min-height: 1.875rem;
+    }
+
+    .stat-v--mark {
+      font-size: 1.25rem;
     }
   }
 </style>

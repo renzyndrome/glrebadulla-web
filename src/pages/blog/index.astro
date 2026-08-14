@@ -1,140 +1,164 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
-import ChromeBar from '../../components/ChromeBar.astro';
-import SiteNav from '../../components/SiteNav.astro';
-import SiteFooter from '../../components/SiteFooter.astro';
+import PageShell from '../../layouts/PageShell.astro';
+import { profile } from '../../data/profile';
 
-// Drafts render in dev, are excluded from the production build.
+// Drafts are visible in dev only, so a work in progress never ships.
 const showDrafts = import.meta.env.DEV;
 const posts = (await getCollection('posts'))
   .filter((p) => showDrafts || !p.data.draft)
-  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmtDate = (d: Date): string => d.toISOString().slice(0, 10);
 ---
 
-<Layout
-  title="blog · Laurence Rebadulla"
-  description="Notes on shipping LLM features, retrieval pipelines, and production engineering."
+<PageShell
+  title={`Writing · ${profile.name}`}
+  description="Notes on directing AI, shipping software, and building tools worth keeping."
 >
-  <a class="skip-link" href="#main">skip to content</a>
-  <div class="terminal">
-    <header>
-      <ChromeBar />
-      <SiteNav />
+  <div class="index shell">
+    <header class="index-head">
+      <h1>Writing</h1>
+      <p>
+        Notes on directing AI, shipping software, and building tools worth
+        keeping.
+      </p>
     </header>
 
-    <main id="main" class="blog pad-x">
-      <p class="cmd"><span class="prompt">$</span> ls blog/ --recent</p>
-      <h1 class="blog-h1">Writing</h1>
+    {
+      posts.length === 0 ? (
+        <p class="empty">No posts yet.</p>
+      ) : (
+        <ol class="posts">
+          {posts.map((p) => (
+            <li>
+              <a class="post" href={`/blog/${p.id}`}>
+                <time datetime={fmtDate(p.data.date)}>{fmtDate(p.data.date)}</time>
+                <div>
+                  <h2>
+                    {p.data.title}
+                    {p.data.draft && <span class="draft">draft</span>}
+                  </h2>
+                  <p>{p.data.summary}</p>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ol>
+      )
+    }
 
-      {
-        posts.length === 0 ? (
-          <p class="empty"># no posts yet</p>
-        ) : (
-          <ol class="posts">
-            {posts.map((post) => (
-              <li class="post-row">
-                <a class="post-link" href={`/blog/${post.id}`}>
-                  <span class="post-date">{fmtDate(post.data.date)}</span>
-                  <span class="post-detail">
-                    <span class="post-title">
-                      {post.data.title}
-                      {post.data.draft && <span class="draft"> [draft]</span>}
-                    </span>
-                    <span class="post-summary">{post.data.summary}</span>
-                  </span>
-                </a>
-              </li>
-            ))}
-          </ol>
-        )
-      }
-    </main>
-
-    <SiteFooter />
+    <p class="back"><a href="/">&#8592; Back to the start</a></p>
   </div>
-</Layout>
+</PageShell>
 
 <style>
-  .blog {
-    padding-top: 48px;
-    padding-bottom: 72px;
+  .index {
+    padding: var(--s14) var(--pad-x) var(--s20);
     min-height: 62vh;
   }
 
-  .cmd {
-    margin-bottom: 10px;
+  .index-head {
+    padding-bottom: var(--s6);
+    border-bottom: 1px solid var(--hair);
   }
 
-  .blog-h1 {
-    margin: 0 0 26px;
-    font: 600 26px var(--font);
-    letter-spacing: -0.02em;
+  .index-head h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    color: var(--t1);
   }
 
-  .empty {
-    margin: 0;
-    font: 400 13px var(--font);
-    color: var(--text-muted);
+  .index-head p {
+    margin-top: var(--s3);
+    max-width: 58ch;
+    font-size: var(--fs-lede);
+    color: var(--t2);
   }
 
-  .posts {
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  .posts > li {
+    border-bottom: 1px solid var(--hair);
   }
 
-  .post-row {
-    border-top: 1px solid var(--hairline);
-  }
-
-  .post-row:last-child {
-    border-bottom: 1px solid var(--hairline);
-  }
-
-  .post-link {
+  .post {
     display: grid;
-    grid-template-columns: 130px 1fr;
-    gap: 32px;
-    padding: 22px 0;
-    transition: opacity var(--hover);
+    grid-template-columns: var(--spine) minmax(0, 1fr);
+    column-gap: var(--gutter);
+    padding: var(--s6) 0;
+    align-items: baseline;
   }
 
-  .post-date {
-    font: 400 12.5px var(--font);
-    color: var(--text-muted);
+  .post time {
+    font-family: var(--mono);
+    font-size: var(--fs-meta);
+    font-variant-numeric: tabular-nums;
+    color: var(--t3);
   }
 
-  .post-title {
-    font: 600 15px var(--font);
-    color: var(--text);
-    transition: color var(--hover);
-  }
-
-  .post-link:hover .post-title {
-    color: var(--accent);
+  .post h2 {
+    display: flex;
+    align-items: center;
+    gap: var(--s3);
+    font-size: var(--fs-lede);
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--t1);
+    line-height: var(--lh-heading);
+    transition: color var(--t-fast) ease;
   }
 
   .draft {
-    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: var(--fs-micro);
     font-weight: 400;
+    padding: 0.125rem var(--s2);
+    border: 1px solid var(--hair-2);
+    border-radius: var(--r-chip);
+    color: var(--t3);
   }
 
-  .post-summary {
-    display: block;
-    margin-top: 6px;
-    font: 400 13px/1.7 var(--font);
-    color: var(--text-muted);
+  .post p {
+    font-size: var(--fs-sm);
+    color: var(--t2);
+    margin-top: 0.375rem;
+    max-width: 62ch;
   }
 
-  @media (max-width: 1024px) {
-    .post-link {
-      grid-template-columns: 1fr;
-      gap: 8px;
+  .empty {
+    padding: var(--s8) 0;
+    color: var(--t3);
+  }
+
+  .back {
+    margin-top: var(--s12);
+  }
+
+  .back a {
+    font-family: var(--mono);
+    font-size: var(--fs-mono-l);
+    color: var(--t3);
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    transition: color var(--t-fast) ease;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .post:hover h2 {
+      color: #fff;
+    }
+
+    .back a:hover {
+      color: var(--t1);
+    }
+  }
+
+  @media (max-width: 800px) {
+    .post {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--s2);
     }
   }
 </style>

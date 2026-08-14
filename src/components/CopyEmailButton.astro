@@ -1,0 +1,35 @@
+---
+// Copy-to-clipboard button with a two-face state swap. Used in the hero and in
+// the contact section, so both instances share this markup and one listener.
+// The faces share a single grid cell (see .swap in global.css) so the button
+// width never jumps when the label changes.
+import { profile } from '../data/profile';
+
+interface Props {
+  id: string;
+  raised?: boolean;
+}
+
+const { id, raised = true } = Astro.props;
+---
+
+<button
+  class:list={['btn', { 'btn--raised': raised }]}
+  type="button"
+  id={id}
+  data-copy-email={profile.email}
+  data-copied="false"
+>
+  <span class="swap">
+    <span class="face face--idle">Copy email</span>
+    <span class="face face--done" aria-hidden="true">
+      <svg width="11" height="11" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+        <path
+          d="M2 6.4 4.6 9 10 3.2"
+          stroke="currentColor"
+          stroke-width="1.6"
+          stroke-linecap="square"></path>
+      </svg>Copied
+    </span>
+  </span>
+</button>

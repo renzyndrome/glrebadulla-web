@@ -1,101 +1,136 @@
-/*
- * Shared long-form (Markdoc) prose styling for article-style pages — blog posts
- * and project detail pages. Imported globally by those pages. Palette-consistent,
- * terminal aesthetic. Accent green only on links (an allowed use).
- */
+/* Shared long-form (Markdoc) prose styling for article-style pages: blog posts
+ * and project detail pages. Imported by those pages.
+ *
+ * Reading measure is set in ch rather than px so it tracks the type size. Links
+ * are the one place the accent appears in prose, which is consistent with the
+ * accent rule in tokens.css (an interactive affordance, not decoration). */
+
 .prose {
-  max-width: 720px;
-  font: 400 14.5px/1.8 var(--font);
-  color: var(--text-secondary);
+  max-width: 68ch;
+  font-family: var(--sans);
+  font-size: var(--fs-lede);
+  line-height: 1.75;
+  color: var(--t2);
+}
+
+/* Markdoc wraps its rendered output in an <article>, so the block spacing has to
+   reach one level deeper than .prose's direct children. Both selectors are kept
+   so this holds whether or not a wrapper is present. The heading rules below
+   have equal specificity and come later, so they still win for h2 and h3. */
+.prose > * + *,
+.prose > article > * + * {
+  margin-top: var(--s5);
 }
 
 .prose h2 {
-  margin: 36px 0 14px;
-  font: 600 20px var(--font);
-  letter-spacing: -0.01em;
-  color: var(--text);
+  margin-top: var(--s10);
+  font-size: var(--fs-h2);
+  font-weight: 500;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.015em;
+  color: var(--t1);
 }
 
 .prose h3 {
-  margin: 28px 0 12px;
-  font: 600 16px var(--font);
-  color: var(--text);
+  margin-top: var(--s8);
+  font-size: var(--fs-h3);
+  font-weight: 500;
+  line-height: var(--lh-heading);
+  letter-spacing: -0.01em;
+  color: var(--t1);
 }
 
-.prose p {
-  margin: 0 0 18px;
+/* A heading immediately after a heading should not inherit the big gap. */
+.prose h2 + h3 {
+  margin-top: var(--s4);
 }
 
 .prose a {
   color: var(--accent);
-  transition: color var(--hover);
+  text-decoration: underline;
+  text-decoration-color: var(--accent-hair);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--t-fast) ease;
 }
 
-.prose a:hover {
-  color: var(--accent-soft);
+@media (hover: hover) and (pointer: fine) {
+  .prose a:hover {
+    text-decoration-color: var(--accent);
+  }
 }
 
 .prose strong {
-  font-weight: 600;
-  color: var(--text);
+  font-weight: 500;
+  color: var(--t1);
+}
+
+.prose em {
+  font-style: italic;
 }
 
 .prose ul,
 .prose ol {
-  margin: 0 0 18px;
-  padding-left: 22px;
+  padding-left: var(--s5);
 }
 
-.prose li {
-  margin-bottom: 8px;
+.prose ul li {
+  list-style: disc;
+}
+
+.prose ol li {
+  list-style: decimal;
+}
+
+.prose li + li {
+  margin-top: var(--s2);
 }
 
 .prose li::marker {
-  color: var(--text-muted);
+  color: var(--t3);
 }
 
 .prose blockquote {
-  margin: 0 0 18px;
-  padding-left: 16px;
-  border-left: 2px solid var(--accent-border);
-  color: var(--text-muted);
+  padding-left: var(--s5);
+  border-left: 1px solid var(--hair-2);
+  color: var(--t3);
 }
 
 .prose code {
-  font: 400 0.9em var(--font);
-  padding: 2px 6px;
+  font-family: var(--mono);
+  font-size: 0.875em;
+  padding: 0.1em 0.35em;
+  border: 1px solid var(--hair);
   border-radius: var(--r-chip);
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
-  color: var(--accent-soft);
+  background: var(--n850);
+  color: var(--t1);
 }
 
 .prose pre {
-  margin: 0 0 20px;
-  padding: 16px 18px;
-  border-radius: var(--r-card);
-  background: var(--bg-panel);
-  border: 1px solid var(--hairline);
   overflow-x: auto;
+  padding: var(--s4);
+  border: 1px solid var(--hair);
+  border-radius: var(--r-card);
+  background: var(--n850);
+  font-size: var(--fs-sm);
+  line-height: 1.6;
 }
 
+/* A code block owns its own border and padding; the inline treatment would
+   double them. */
 .prose pre code {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--text);
-  font-size: 13px;
+  font-size: inherit;
 }
 
 .prose img {
-  max-width: 100%;
-  height: auto;
+  border: 1px solid var(--hair);
   border-radius: var(--r-card);
-  border: 1px solid var(--hairline);
 }
 
 .prose hr {
-  margin: 32px 0;
   border: 0;
-  border-top: 1px solid var(--hairline);
+  border-top: 1px solid var(--hair);
 }

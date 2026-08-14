@@ -1,7 +1,6 @@
 ---
 name: creator-analytics-dashboard
 order: 30
-icon: analytics
 description: Real-time revenue, engagement and growth tracking with automated Telegram & Discord alerts. The content team uses it daily instead of pulling reports by hand.
 chips:
   - label: Python
@@ -12,16 +11,32 @@ chips:
     ai: false
 ---
 
-## What it does
+## The problem
 
-A live dashboard for revenue, engagement and growth, with automated alerts pushed
-to Telegram and Discord.
+Revenue, engagement and growth numbers lived in several different places, and the team
+assembled them by hand to see how a week had gone. That report was already stale by the
+time it was finished, and nobody wanted to build it twice in a day.
 
-## Approach
+## The pipeline
 
-Data is collected and processed on a schedule, surfaced in real time, and pushed
-out as alerts so the team sees changes without pulling reports by hand.
+Scheduled Python jobs collect from each source, normalise what comes back, and write it
+to a store the dashboard reads. Collection and presentation are deliberately separate.
+Sources rate limit, go down, and change their response shape without warning, and none
+of that should take the dashboard down with it. When a source fails, the last known
+good numbers stay on screen and the failure reports itself rather than rendering an
+empty chart that looks like a business problem.
+
+Timezones caused more bugs here than anything else. Different sources report in
+different zones, and a day boundary interpreted in the wrong one quietly shifts every
+daily figure. Storing everything in UTC and converting once, at the edge, settled it.
+
+## Alerts people don't learn to ignore
+
+Alerts go out through Telegram and Discord, because that is where the team already
+talks. The real failure mode of an alerting system is being ignored, so thresholds fire
+on things actually worth interrupting someone for, and a condition that is still true
+does not notify again. An alert that arrives every hour becomes furniture.
 
 ## Stack
 
-Python on AWS, with Telegram and Discord bots handling delivery.
+Python on AWS with scheduled jobs, delivering through the Telegram and Discord APIs.

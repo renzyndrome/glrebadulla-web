@@ -1,115 +1,166 @@
 ---
-// Experience — git-log metaphor. Only the current role's date (2024 — present)
-// is green. Em-dashes in the date ranges are fixed design strings (keep them).
-interface Role {
-  date: string;
-  title: string;
-  summary: string;
-  current?: boolean;
-}
+// Experience as real tabular data in a real table, because that is the
+// structure a reader uses to cross-check a CV. The table keeps its semantics
+// and scrolls on narrow screens rather than being reflowed to display:block,
+// which would strip the row/column relationships from the a11y tree.
+import { roles, education } from '../data/experience';
 
-const roles: Role[] = [
-  {
-    date: '2024 — present',
-    current: true,
-    title: 'Senior Full Stack Developer · US-based Media Company (remote)',
-    summary:
-      'LLM features via OpenAI API, retrieval pipelines, real-time analytics, social automation. Python, FastAPI, React, AWS.',
-  },
-  {
-    date: '2023 — 2024',
-    title: 'Senior Full Stack Developer · Connect Psych Services (remote)',
-    summary:
-      'Telehealth platform with live chat, voice and video. Django REST, React, Next.js on AWS.',
-  },
-  {
-    date: '2020 — 2023',
-    title: 'Software Developer → Senior · LITS',
-    summary:
-      'Led E-Legislative System for local government; Odoo CRM/Website/HRIS. Promoted for technical leadership.',
-  },
-  {
-    date: '2018 — 2019',
-    title: 'Junior Software Engineer · Infoshift Inc.',
-    summary:
-      'Public developer APIs for one of the largest PH telecoms. Flask, Node.js, AWS microservices.',
-  },
-];
+const firstYear = roles[roles.length - 1].period.slice(0, 4);
 ---
 
-<section class="experience pad-x" id="experience">
-  <h2 class="cmd"><span class="prompt">$</span> git log --oneline --experience</h2>
-  <ol class="log">
-    {
-      roles.map((r) => (
-        <li class="row">
-          <div class:list={['date', { 'date--current': r.current }]}>
-            {r.date}
-          </div>
-          <div class="detail">
-            <h3 class="role-title">{r.title}</h3>
-            <div class="role-summary">{r.summary}</div>
-          </div>
-        </li>
-      ))
-    }
-  </ol>
+<section class="sec" id="experience">
+  <div class="shell">
+    <header class="sec-head">
+      <span class="sec-num">04</span>
+      <h2>Experience</h2>
+      <span class="sec-meta">{firstYear} to present</span>
+    </header>
+
+    <div class="sec-body">
+      <div class="scroller" role="region" aria-label="Experience table" tabindex="0">
+        <table class="xp">
+          <caption class="sr-only">
+            Professional experience, most recent first
+          </caption>
+          <thead>
+            <tr>
+              <th scope="col">Period</th>
+              <th scope="col">Role</th>
+              <th scope="col">Organization</th>
+              <th scope="col">Stack</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              roles.map((r) => (
+                <tr>
+                  <td><span class="xp-when">{r.period}</span></td>
+                  <td>
+                    <span class="xp-role">{r.role}</span>
+                    <p class="xp-note">{r.note}</p>
+                  </td>
+                  <td>
+                    <span class="xp-org">
+                      {r.org}
+                      {r.orgNote && <small>{r.orgNote}</small>}
+                    </span>
+                  </td>
+                  <td><span class="xp-stack">{r.stack}</span></td>
+                </tr>
+              ))
+            }
+            <tr class="xp-edu">
+              <td><span class="xp-when">{education.period}</span></td>
+              <td><span class="xp-role">{education.qualification}</span></td>
+              <td><span class="xp-org">{education.institution}</span></td>
+              <td><span class="xp-stack">Education</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="scroll-hint">Scroll the table for organization and stack &#8594;</p>
+    </div>
+  </div>
 </section>
 
 <style>
-  .experience {
-    padding-top: 0;
-    padding-bottom: 68px;
+  .xp {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 40rem;
   }
 
-  .cmd {
-    margin-bottom: 26px;
+  .xp th {
+    text-align: left;
+    font-weight: 400;
+    font-family: var(--mono);
+    font-size: var(--fs-micro);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--t3);
+    padding: 0 var(--s6) 0.875rem 0;
   }
 
-  .log {
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+  .xp td {
+    padding: var(--s5) var(--s6) var(--s5) 0;
+    border-top: 1px solid var(--hair);
+    vertical-align: top;
   }
 
-  .row {
-    display: grid;
-    grid-template-columns: 190px 1fr;
-    gap: 32px;
-    padding: 22px 0;
-    border-top: 1px solid var(--hairline);
+  /* The Period column sits on the spine, like every other leading column. */
+  .xp th:first-child,
+  .xp td:first-child {
+    width: 10rem;
+    padding-right: var(--gutter);
   }
 
-  .row:last-child {
-    border-bottom: 1px solid var(--hairline);
+  .xp-when {
+    font-family: var(--mono);
+    font-size: var(--fs-mono-l);
+    font-variant-numeric: tabular-nums;
+    color: var(--t2);
+    white-space: nowrap;
   }
 
-  .date {
-    font: 400 12.5px var(--font);
-    color: var(--text-muted);
+  /* The current role reads brighter, not accented: the accent budget is spent
+     elsewhere and brightness is enough to mark one row. */
+  .xp tbody tr:first-child .xp-when {
+    color: var(--t1);
   }
 
-  .date--current {
-    color: var(--accent);
+  .xp-role {
+    display: block;
+    font-size: var(--fs-body);
+    font-weight: 500;
+    color: var(--t1);
   }
 
-  .role-title {
-    font: 600 15px var(--font);
-    color: var(--text);
+  .xp-note {
+    font-size: var(--fs-sm);
+    color: var(--t3);
+    margin-top: 0.375rem;
+    max-width: 44ch;
   }
 
-  .role-summary {
-    margin-top: 6px;
-    font: 400 13px/1.7 var(--font);
-    color: var(--text-muted);
+  .xp-org {
+    display: block;
+    font-size: var(--fs-body);
+    color: var(--t2);
   }
 
-  @media (max-width: 1024px) {
-    .row {
-      grid-template-columns: 1fr;
-      gap: 8px;
+  .xp-org small {
+    display: block;
+    font-family: var(--mono);
+    font-size: var(--fs-micro);
+    color: var(--t3);
+    margin-top: var(--s1);
+  }
+
+  .xp-stack {
+    display: block;
+    font-family: var(--mono);
+    font-size: var(--fs-meta);
+    color: var(--t3);
+    line-height: 1.55;
+  }
+
+  /* Education is a different kind of row, so it reads one step quieter. */
+  .xp-edu .xp-role {
+    font-weight: 400;
+    color: var(--t2);
+  }
+
+  .scroll-hint {
+    display: none;
+  }
+
+  @media (max-width: 800px) {
+    .scroll-hint {
+      display: block;
+      font-family: var(--mono);
+      font-size: var(--fs-micro);
+      color: var(--t3);
+      margin-top: 0.875rem;
     }
   }
 </style>

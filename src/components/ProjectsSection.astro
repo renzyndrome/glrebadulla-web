@@ -1,207 +1,185 @@
 ---
-// Projects — now driven by the `projects` content collection (edit via Keystatic
-// at /keystatic in dev, or the YAML files in src/content/projects/). Markup and
-// styles are unchanged from the hand-authored version.
-// Chip discipline: AI chips = green-tint bg + accent-soft text; neutral chips =
-// white/6% bg + secondary text.
+// Selected work: dense rows, not a card wall. Each row is one link covering the
+// whole area, so the hit target is the row rather than the title alone.
+//
+// Hairlines live on the <li> and the hover surface lives on the <a>, which
+// bleeds 1rem past them on purpose: the rules stay aligned with every other
+// rule on the page while the hover state reads as a wider band.
 import { getCollection } from 'astro:content';
-import { getCommand } from '../lib/projectGlyphs';
 
-const projects = (await getCollection('projects'))
-  .map((entry) => ({
-    slug: entry.id,
-    name: entry.data.name ?? entry.id,
-    description: entry.data.description,
-    chips: entry.data.chips,
-    image: entry.data.image,
-    icon: entry.data.icon,
-    order: entry.data.order,
-  }))
-  .sort((a, b) => a.order - b.order);
+const projects = (await getCollection('projects')).sort(
+  (a, b) => a.data.order - b.data.order
+);
 ---
 
-<section class="projects pad-x" id="projects">
-  <p class="cmd"><span class="prompt">$</span> ls projects/ --sort=impact</p>
-  <h2 class="projects-h2">AI in production.</h2>
+<section class="sec" id="work">
+  <div class="shell">
+    <header class="sec-head">
+      <span class="sec-num">03</span>
+      <h2>Work</h2>
+      <span class="sec-meta">{projects.length} projects</span>
+    </header>
 
-  <div class="projects-grid">
-    {
-      projects.map((p) => (
-        <article class="project">
-          <div class="shot">
-            {p.image ? (
-              <img
-                src={p.image}
-                alt={`${p.name} screenshot`}
-                loading="lazy"
-                decoding="async"
-              />
-            ) : (
-              <div class="term" aria-hidden="true">
-                <span class="term-line">
-                  <span class="term-prompt">$</span>
-                  <span class="term-cmd">{getCommand(p.icon)}</span>
-                </span>
-              </div>
-            )}
-          </div>
-          <div class="project-body">
-            <h3 class="project-name">
-              <a class="project-link" href={`/projects/${p.slug}`}>{p.name}</a>
-            </h3>
-            <p class="project-desc">{p.description}</p>
-            <div class="project-chips">
-              {p.chips.map((c) => (
-                <span class:list={['chip', c.ai ? 'chip--ai' : 'chip--neutral']}>
-                  {c.label}
-                </span>
-              ))}
-            </div>
-          </div>
-        </article>
-      ))
-    }
+    <div class="sec-body">
+      <ol class="rows">
+        {
+          projects.map((p, i) => (
+            <li>
+              <a class="row" href={`/projects/${p.id}`}>
+                <span class="row-i">{String(i + 1).padStart(2, '0')}</span>
+                <div>
+                  <h3 class="row-name">{p.data.name ?? p.id}</h3>
+                  <p class="row-d">{p.data.description}</p>
+                </div>
+                <div class="row-tags">
+                  <ul class="tags">
+                    {p.data.chips.map((c) => (
+                      <li class:list={[{ 'is-ai': c.ai }]}>{c.label}</li>
+                    ))}
+                  </ul>
+                </div>
+                <span class="row-go" aria-hidden="true">&#8594;</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      <p class="nda">
+        Most of this is internal tooling built for employers under NDA. The
+        descriptions are the part I can share. Screenshots, client names and
+        production data are not.
+      </p>
+    </div>
   </div>
 </section>
 
 <style>
-  .projects {
-    padding-top: 0;
-    padding-bottom: 68px;
+  .rows {
+    border-bottom: 1px solid var(--hair);
   }
 
-  .cmd {
-    margin-bottom: 16px;
+  .rows > li {
+    border-top: 1px solid var(--hair);
+    transition: border-color 180ms var(--ease-in);
   }
 
-  .projects-h2 {
-    margin: 0 0 26px;
-    font: 600 26px var(--font);
-    letter-spacing: -0.02em;
+  /* The section head rule already closes the top edge: never double a hairline. */
+  .rows > li:first-child {
+    border-top: 0;
   }
 
-  .projects-grid {
+  .row {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+    grid-template-columns: var(--spine) minmax(0, 1fr) minmax(0, 13rem) 1.5rem;
+    column-gap: var(--gutter);
+    align-items: start;
+    margin: 0 calc(var(--s4) * -1);
+    padding: 1.375rem var(--s4);
+    border-radius: var(--r-btn);
+    transition: background-color 180ms var(--ease-in);
   }
 
-  .project {
-    position: relative;
-    background: var(--bg-panel);
-    border: 1px solid var(--hairline);
-    border-radius: var(--r-project);
-    overflow: hidden;
-    transition: border-color var(--hover);
+  .row-i {
+    font-family: var(--mono);
+    font-size: var(--fs-meta);
+    font-variant-numeric: tabular-nums;
+    color: var(--t3);
+    padding-top: 0.1875rem;
   }
 
-  .project:hover {
-    border-color: var(--accent-border);
+  .row-name {
+    font-family: var(--mono);
+    font-size: var(--fs-body);
+    font-weight: 500;
+    color: var(--t1);
+    letter-spacing: -0.005em;
+    line-height: 1.4;
   }
 
-  /* Accessible card link: the name is the link; ::after makes the whole card
-     clickable while keeping the accessible name = project name. */
-  .project-link {
-    color: inherit;
-    transition: color var(--hover);
+  .row-d {
+    font-size: var(--fs-sm);
+    color: var(--t2);
+    margin-top: 0.375rem;
+    max-width: 52ch;
   }
 
-  .project-link::after {
-    content: '';
-    position: absolute;
-    inset: 0;
+  .row-tags {
+    padding-top: 0.1875rem;
   }
 
-  .project:hover .project-name {
+  .row-go {
+    font-family: var(--mono);
+    font-size: var(--fs-sm);
     color: var(--accent);
+    justify-self: end;
+    padding-top: var(--s1);
+    opacity: 0;
+    transform: translateX(-6px);
+    transition: opacity 160ms var(--ease-in), transform 160ms var(--ease-in);
   }
 
-  .shot {
-    height: 200px;
-    border-bottom: 1px solid var(--hairline);
-    overflow: hidden;
-  }
+  @media (hover: hover) and (pointer: fine) {
+    .row:hover {
+      background: var(--n750);
+    }
 
-  .shot img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
+    .rows > li:has(.row:hover) {
+      border-top-color: var(--hair-2);
+    }
 
-  /*
-   * A single, centered `$ command` on a dark inset "screen" — a minimal banner,
-   * distinct from the card's description. Green `$` is an allowed accent use.
-   */
-  .term {
-    height: 100%;
-    display: grid;
-    place-items: center;
-    padding: 0 24px;
-    background: var(--bg);
-    pointer-events: none;
-  }
-
-  .term-line {
-    font: 400 13.5px var(--font);
-    white-space: nowrap;
-    text-align: center;
-  }
-
-  .term-prompt {
-    color: var(--accent);
-  }
-
-  .term-cmd {
-    color: var(--text);
-  }
-
-  @media (max-width: 640px) {
-    .term-line {
-      font-size: 12.5px;
+    .row:hover .row-go {
+      opacity: 1;
+      transform: translateX(0);
+      transition: opacity var(--t-in) var(--ease-out),
+        transform var(--t-in) var(--ease-out);
     }
   }
 
-  .project-body {
-    padding: 24px;
+  /* Keyboard users get the same affordance as pointer users. */
+  .row:focus-visible {
+    background: var(--n750);
+    outline-offset: 3px;
   }
 
-  .project-name {
-    margin: 0 0 8px;
-    font: 600 16px var(--font);
-    color: var(--text);
+  .row:focus-visible .row-go {
+    opacity: 1;
+    transform: translateX(0);
+    transition: opacity var(--t-in) var(--ease-out),
+      transform var(--t-in) var(--ease-out);
   }
 
-  .project-desc {
-    margin: 0 0 14px;
-    font: 400 13px/1.7 var(--font);
-    color: var(--text-secondary);
+  .nda {
+    font-size: var(--fs-sm);
+    color: var(--t3);
+    margin-top: var(--s6);
+    max-width: 62ch;
   }
 
-  .project-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+  @media (max-width: 960px) {
+    .row {
+      grid-template-columns: 2.5rem minmax(0, 1fr) 1.5rem;
+      column-gap: var(--s5);
+      row-gap: var(--s3);
+    }
+
+    .row-tags {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .row-go {
+      grid-column: 3;
+      grid-row: 1;
+    }
   }
 
-  .chip {
-    font: 400 11px var(--font);
-    padding: 4px 10px;
-    border-radius: var(--r-chip);
-  }
-
-  .chip--ai {
-    background: var(--accent-tint);
-    color: var(--accent-soft);
-  }
-
-  .chip--neutral {
-    background: var(--hairline-chip);
-    color: var(--text-secondary);
-  }
-
-  @media (max-width: 1024px) {
-    .projects-grid {
-      grid-template-columns: 1fr;
+  @media (prefers-reduced-motion: reduce) {
+    .row-go,
+    .row:hover .row-go,
+    .row:focus-visible .row-go {
+      transform: none;
+      transition: opacity var(--t-fast) ease;
     }
   }
 </style>

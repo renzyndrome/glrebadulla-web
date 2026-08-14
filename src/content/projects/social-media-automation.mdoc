@@ -1,0 +1,50 @@
+---
+name: social-media-automation
+order: 45
+description: A service that posts to the social platform APIs on a schedule and runs engagement workflows, so posting and follow-up stop being manual steps.
+chips:
+  - label: Python
+    ai: false
+  - label: FastAPI
+    ai: false
+  - label: Social APIs
+    ai: false
+  - label: AWS
+    ai: false
+---
+
+## The problem
+
+Posting on a schedule and following up on engagement are both jobs where the work itself
+is trivial and the timing is the whole point. Done by hand, it means somebody is awake
+at the right moment, every single time, and eventually they are not.
+
+## Scheduling that survives its own failures
+
+The service runs scheduled jobs behind FastAPI. "Post at 09:00" is the easy half of the
+requirement. "Post exactly once, even if the worker restarted at 08:59" is the half that
+shapes the design.
+
+Scheduled actions are keyed and idempotent, so a retry after a crash does not publish
+the same thing twice. Retries back off instead of hammering an API that is already
+refusing. And failures are loud: a job that could not finish surfaces where someone will
+see it, rather than settling into a log file. A late post is recoverable. A missed post
+that nobody knew about is not.
+
+## Working against the social platform APIs
+
+The service connects directly to the social media APIs, which is where most of the real
+difficulty lives. Every platform authenticates differently, expires its tokens on its own
+schedule, publishes its own rate limits and then enforces stricter ones in practice, and
+accepts a slightly different shape of post. Tokens have to be refreshed before a job
+needs them rather than after a failure, because a token that expires at 3am takes the
+morning's posts with it.
+
+Each platform sits behind an adapter with one internal interface, so the scheduling logic
+never learns platform-specific rules. Adding a platform means writing one adapter, and a
+platform changing its API means editing one file.
+
+## Stack
+
+Python and FastAPI on AWS, using EC2, S3, RDS and Lambda, integrated with the social
+media platform APIs.

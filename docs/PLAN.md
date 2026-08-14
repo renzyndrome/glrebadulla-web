@@ -1,3 +1,11 @@
+> **ARCHIVED (August 2026).** This is the original build roadmap for the "Terminal Dark Green"
+> design, which was replaced by the "One Accent" design because it read as generic. It is kept as
+> history. Do not follow it. The current design source of truth is
+> `design/mockups/02-monochrome-accent.html`, and the current rules are in `/CLAUDE.md`.
+>
+> Also note this document predates the blog, Keystatic, and content collections, and it describes
+> content living in component `const` arrays — CV facts now live in `src/data/*.ts`.
+
 # Plan: Build glrebadulla.dev — Terminal Dark Green Portfolio (Astro + TS)
 
 ## Context

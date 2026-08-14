@@ -1,0 +1,919 @@
+<title>Instrument Sheet</title>
+
+<style>
+/* ============================================================================
+   DIRECTION 04 — "THE INSTRUMENT"
+   One-sentence idea: a portfolio built like the readout of a well-made
+   measuring instrument, where density, column alignment, units and labelled
+   data are the entire aesthetic. No costume, no chrome, no prompts.
+
+   TYPE — one family only.
+     Production face: Berkeley Mono (licensed, self-hosted woff2).
+     Second choice: Commit Mono. Fallback: ui-monospace / SF Mono / Menlo.
+     Scale (rem, 16px root):  0.6875 (11px, labels + units)
+                              0.8125 (13px, metadata + sub-notes)
+                              0.9375 (15px, BODY + table cells — reading size)
+                              1.0625 (17px, name / section lede)
+                              1.25   (20px, about lead line)
+                              clamp(1.625 → 2.625rem) display claim, once.
+     Measure: prose capped at 78ch–84ch. tabular-nums globally.
+     Tracking: 0 for prose; +0.08em only on 11px uppercase labels;
+               -0.02em on the display claim.
+
+   PALETTE — neutral dark, one status colour.
+     --bg      #0c0d0d   page (uniform: there are no raised panels)
+     --hover   #141615   row hover tint only
+     --line    #1e2120   hairline (structure)
+     --line-2  #343836   hairline, emphatic (section + column rules)
+     --text    #e6e8e7   body            15.0:1
+     --dim     #9aa09d   secondary prose  6.9:1
+     --faint   #858c89   labels + units   5.7:1
+     --amber   #e8a33d   STATUS ONLY      9.1:1
+
+   ACCENT RULE (strict): amber is a status colour, never decoration and never
+   a link colour. It has exactly six jobs: availability status, the current
+   role's date range, "production" state on the AI stack row, YES in the LLM
+   column, the copy-confirmed state, and the focus ring. Links are plain text
+   with a hairline underline.
+
+   BORDER LANGUAGE: 1px hairlines only — chosen over box-drawing glyphs so the
+   rules stay true at every viewport. Zero border-radius, zero shadows, zero
+   gradients, no translucency.
+
+   SPACING: 4px base unit. Steps used: 4 · 8 · 12 · 16 · 24 · 28 · 32 · 48 · 64.
+   Section rhythm: rule + label row, 28px to content, 64px to the next rule
+   (48px on narrow viewports). Gutter clamp(20px → 40px).
+
+   MOTION BUDGET: one transition token, 120ms linear, on color /
+   background-color / text-decoration-color for interactive rows and links.
+   Nothing animates on load. Fully disabled under prefers-reduced-motion.
+   ========================================================================= */
+
+:root {
+  --bg: #0c0d0d;
+  --hover: #141615;
+  --line: #1e2120;
+  --line-2: #343836;
+  --text: #e6e8e7;
+  --dim: #9aa09d;
+  --faint: #858c89;
+  --amber: #e8a33d;
+
+  --mono: "Berkeley Mono", "Commit Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+  --pad: clamp(1.25rem, 4vw, 2.5rem);
+  --sec: clamp(3rem, 6vw, 4rem);
+  --t: 120ms linear;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sheet {
+  background: var(--bg);
+  color: var(--text);
+  max-width: 1280px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+@media (min-width: 1340px) {
+  .sheet { border-left: 1px solid var(--line); border-right: 1px solid var(--line); }
+}
+
+.sr {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+a {
+  color: var(--text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--line-2);
+  text-underline-offset: 3px;
+  transition: color var(--t), text-decoration-color var(--t);
+}
+:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+/* ---- masthead ------------------------------------------------------------ */
+.bar {
+  position: sticky; top: 0; z-index: 10;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line-2);
+}
+.bar-in {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; padding: 0 var(--pad);
+}
+.bar-id {
+  display: flex; align-items: baseline; gap: 8px;
+  min-height: 48px; padding: 6px 0;
+  font-size: 0.8125rem; text-transform: uppercase; letter-spacing: 0.1em;
+  text-decoration: none; color: var(--text); white-space: nowrap;
+}
+.bar-role {
+  font-size: 0.6875rem; letter-spacing: 0.06em; color: var(--faint);
+  text-transform: none;
+}
+.bar-sep { color: var(--line-2); }
+.nav { display: flex; align-items: center; }
+.nav a {
+  display: inline-flex; align-items: baseline; gap: 6px;
+  min-height: 44px; padding: 12px 9px;
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--dim); text-decoration: none;
+  transition: color var(--t);
+}
+.nav .ni { color: var(--faint); font-size: 0.625rem; }
+@media (hover: hover) and (pointer: fine) {
+  .nav a:hover { color: var(--text); }
+  .nav a:hover .ni { color: var(--dim); }
+  a:hover { text-decoration-color: var(--text); }
+}
+@media (max-width: 1199px) { .nav .ni { display: none; } }
+@media (max-width: 1099px) { .bar-role, .bar-sep { display: none; } }
+@media (min-width: 861px) {
+  /* pull the last nav item's padding back so its text lands on the gutter */
+  .nav { margin-right: -9px; }
+}
+@media (max-width: 860px) {
+  .bar-in { flex-wrap: wrap; padding: 0; }
+  .bar-id { min-height: 44px; padding: 6px var(--pad); }
+  .nav {
+    width: 100%; overflow-x: auto; border-top: 1px solid var(--line);
+    scrollbar-width: thin;
+  }
+  .nav a { padding: 12px; }
+  .nav a:first-child { padding-left: var(--pad); }
+  .nav a:last-child { padding-right: var(--pad); }
+}
+
+/* ---- section scaffolding ------------------------------------------------- */
+.sec { padding: 0 var(--pad) var(--sec); scroll-margin-top: 56px; }
+@media (max-width: 860px) { .sec { scroll-margin-top: 100px; } }
+.ch {
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  padding: 12px 0 10px;
+  border-top: 1px solid var(--line-2);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 28px;
+}
+.sec:first-of-type .ch { border-top: 0; }
+.ch-i { font-size: 0.6875rem; color: var(--faint); }
+.ch-n {
+  font-size: 0.9375rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.14em;
+}
+.ch-m {
+  margin-left: auto; font-size: 0.6875rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint);
+}
+.ch-m .on { color: var(--amber); }
+@media (max-width: 620px) { .ch-m { margin-left: 0; flex-basis: 100%; } }
+
+.lede { color: var(--dim); max-width: 80ch; }
+
+/* ---- 01 identity -------------------------------------------------------- */
+.id-grid { display: grid; grid-template-columns: minmax(0, 1fr) 296px; gap: 28px; }
+@media (max-width: 900px) { .id-grid { grid-template-columns: 1fr; gap: 32px; } }
+
+.id-h1 { display: block; }
+.id-name {
+  display: block; font-size: 1.0625rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: 0.16em;
+}
+.id-role {
+  display: block; margin-top: 4px;
+  font-size: 0.9375rem; font-weight: 400; color: var(--dim); letter-spacing: 0;
+}
+.id-claim {
+  margin-top: 24px;
+  font-size: clamp(1.625rem, 4.2vw, 2.625rem);
+  line-height: 1.14; letter-spacing: -0.02em; font-weight: 500;
+  max-width: 30ch;
+}
+.id-lede { margin-top: 20px; color: var(--dim); max-width: 78ch; }
+.id-act { margin-top: 24px; display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.id-act .dot { color: var(--line-2); }
+@media (max-width: 760px) {
+  .id-act { flex-direction: column; align-items: flex-start; gap: 0; }
+  .id-act .dot { display: none; }
+  .id-act a { display: inline-flex; align-items: center; min-height: 44px; }
+}
+
+/* readout rail */
+.readout { font-size: 0.8125rem; }
+.ro {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+}
+.ro:first-child { border-top: 1px solid var(--line-2); }
+.ro dt {
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint); white-space: nowrap;
+}
+.ro dd { text-align: right; }
+.ro dd.state { color: var(--amber); letter-spacing: 0.06em; text-transform: uppercase; }
+@media (min-width: 901px) {
+  .readout { border-left: 1px solid var(--line); padding-left: 28px; }
+}
+
+/* stats strip — 1px grid gaps, no cards */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 1px; background: var(--line);
+  border: 1px solid var(--line);
+  margin-top: 40px;
+}
+.stat { background: var(--bg); padding: 14px 16px 16px; }
+.stat dt {
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint);
+}
+.stat dd {
+  margin-top: 6px; font-size: clamp(1.5rem, 3vw, 1.875rem);
+  line-height: 1.1; letter-spacing: -0.02em;
+}
+.stat dd.txt { font-size: clamp(1.125rem, 2.1vw, 1.375rem); letter-spacing: 0; }
+.stat .u { font-size: 0.8125rem; color: var(--faint); letter-spacing: 0; margin-left: 0.4em; }
+.stat .note {
+  display: block; margin-top: 8px; font-size: 0.8125rem;
+  line-height: 1.5; letter-spacing: 0; color: var(--dim);
+}
+@media (max-width: 900px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 430px) { .stats { grid-template-columns: 1fr; } }
+
+/* ---- 02 about ----------------------------------------------------------- */
+.ab { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; }
+@media (max-width: 760px) { .ab { grid-template-columns: 1fr; gap: 24px; } }
+.ph { margin: 0; }
+.ph-box {
+  aspect-ratio: 4 / 5; border: 1px solid var(--line-2);
+  display: grid; place-items: center; max-width: 220px;
+}
+.ph-box span {
+  font-size: 0.6875rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--faint);
+}
+.ph figcaption {
+  margin-top: 8px; font-size: 0.6875rem; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--faint);
+}
+.ab-lead { font-size: 1.25rem; line-height: 1.35; letter-spacing: -0.01em; max-width: 34ch; }
+.ab-body { margin-top: 16px; color: var(--dim); max-width: 82ch; }
+/* same label/value readout shape as the hero rail — one component, reused */
+.ab-meta { margin-top: 28px; max-width: 46rem; }
+.ab-meta > div {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
+  padding: 9px 0; border-bottom: 1px solid var(--line);
+}
+.ab-meta > div:first-child { border-top: 1px solid var(--line-2); }
+.ab-meta dt {
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint); white-space: nowrap;
+}
+.ab-meta dd { font-size: 0.8125rem; text-align: right; }
+
+/* ---- tables (the core of the direction) --------------------------------- */
+.scroll { overflow-x: auto; scrollbar-width: thin; }
+.scroll-lede { margin-top: 24px; }
+table {
+  width: 100%; border-collapse: collapse; table-layout: fixed;
+  font-variant-numeric: tabular-nums;
+}
+thead th {
+  text-align: left; vertical-align: bottom;
+  font-size: 0.6875rem; font-weight: 400; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint);
+  padding: 0 16px 8px 0; border-bottom: 1px solid var(--line-2);
+}
+tbody th, tbody td {
+  text-align: left; vertical-align: top; font-weight: 400;
+  padding: 12px 16px 13px 0; border-bottom: 1px solid var(--line);
+}
+/* last column sits flush on the gutter, like every other flush edge */
+thead th:last-child, tbody tr > *:last-child { padding-right: 0; }
+
+/* One record = one <tbody>. Records whose prose is longer than a cell get a
+   detail row underneath, indented to the second column: the aligned columns
+   stay aligned at every width, and the prose keeps a readable measure instead
+   of being squeezed into 20ch. */
+tbody tr { transition: background-color var(--t); }
+tr.rec > * { padding-bottom: 5px; border-bottom: 0; }
+/* the detail cell spans every column and is indented by exactly the index
+   column, so its prose starts on the second column's left edge */
+tr.det > td { padding: 0 0 14px 44px; }
+tr.det .body, tr.det .slug {
+  display: block;
+  /* prose stays inside the viewport even while the record row scrolls.
+     20px is a classic-scrollbar allowance, since 100vw includes it. */
+  max-width: min(84ch, calc(100vw - 2 * var(--pad) - 64px));
+}
+tr.det .body { color: var(--dim); }
+tr.det .slug { margin: 0 0 5px; }
+@media (max-width: 760px) {
+  tr.det > td { padding-left: 0; }
+  tr.det .body, tr.det .slug { max-width: calc(100vw - 2 * var(--pad) - 20px); }
+}
+@media (hover: hover) and (pointer: fine) {
+  tbody:hover tr { background: var(--hover); }
+  tbody:hover .idx { color: var(--text); }
+}
+.idx { color: var(--faint); font-size: 0.8125rem; transition: color var(--t); }
+.num { text-align: right; padding-right: 24px; }
+.rt { text-align: right; }
+.sub { display: block; margin-top: 3px; font-size: 0.8125rem; color: var(--faint); }
+.slug { display: block; margin-top: 3px; font-size: 0.8125rem; color: var(--faint); }
+.body { color: var(--dim); }
+.stack { color: var(--dim); font-size: 0.875rem; }
+.stack .ai { color: var(--text); }
+.state {
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--faint);
+}
+.state.prod { color: var(--amber); }
+.flag { font-size: 0.8125rem; letter-spacing: 0.06em; color: var(--faint); text-align: right; }
+.flag.yes { color: var(--amber); }
+.name { letter-spacing: -0.005em; }
+.period { white-space: nowrap; color: var(--dim); }
+.period.now { color: var(--amber); }
+.org { color: var(--dim); }
+.date { color: var(--faint); font-size: 0.875rem; white-space: nowrap; }
+
+/* column widths — fixed layout keeps the columns aligned regardless of copy */
+.t-skills { min-width: 740px; }
+.t-skills .c1 { width: 44px; } .t-skills .c2 { width: 190px; }
+.t-skills .c3 { width: 76px; } .t-skills .c5 { width: 130px; }
+
+/* stack column sized so 5 of 6 stack lists set on one line: keeps the
+   record row one line tall and the detail rows on an even rhythm */
+.t-work { min-width: 640px; }
+.t-work .c1 { width: 44px; } .t-work .c3 { width: 276px; } .t-work .c4 { width: 52px; }
+
+/* organization column sized so both long employer names set on one line */
+.t-exp { min-width: 780px; }
+.t-exp .c1 { width: 44px; } .t-exp .c2 { width: 152px; }
+.t-exp .c4 { width: 236px; } .t-exp .c5 { width: 176px; }
+
+.t-log { min-width: 480px; }
+.t-log .c1 { width: 44px; } .t-log .c2 { width: 132px; }
+
+.foot-note {
+  margin-top: 12px; font-size: 0.6875rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint);
+}
+
+/* ---- 07 contact --------------------------------------------------------- */
+.ct { display: grid; grid-template-columns: minmax(0, 1fr) 216px; gap: 28px; align-items: start; }
+@media (max-width: 760px) { .ct { grid-template-columns: 1fr; gap: 32px; } }
+.ct-lead { font-size: 1.25rem; letter-spacing: -0.01em; }
+.ct-body { margin-top: 12px; color: var(--dim); max-width: 72ch; }
+.chan { margin-top: 24px; }
+.chan > div {
+  display: grid; grid-template-columns: 132px minmax(0, 1fr);
+  align-items: baseline; gap: 12px;
+  padding: 11px 0; border-bottom: 1px solid var(--line);
+}
+.chan > div:first-child { border-top: 1px solid var(--line-2); }
+.chan dt {
+  font-size: 0.6875rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint);
+}
+.chan dd { min-width: 0; overflow-wrap: anywhere; }
+.chan dd.pair {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+@media (max-width: 520px) { .chan > div { grid-template-columns: 92px minmax(0, 1fr); } }
+.copy {
+  font-family: inherit; font-size: 0.6875rem; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--faint);
+  background: transparent; border: 1px solid var(--line-2); border-radius: 0;
+  padding: 6px 10px; min-height: 32px; cursor: pointer;
+  transition: color var(--t), border-color var(--t);
+}
+.copy[data-state="done"] { color: var(--amber); border-color: var(--amber); }
+@media (hover: hover) and (pointer: fine) { .copy:hover { color: var(--text); border-color: var(--faint); } }
+@media (max-width: 760px) { .copy { min-height: 44px; padding: 10px 14px; } }
+
+.qr { margin: 0; }
+.qr-box {
+  position: relative; aspect-ratio: 1 / 1; max-width: 216px;
+  border: 1px solid var(--line-2); display: grid; place-items: center;
+}
+.qr-box i {
+  position: absolute; width: 30px; height: 30px; border: 2px solid var(--line-2);
+}
+.qr-box i:nth-of-type(1) { top: 14px; left: 14px; }
+.qr-box i:nth-of-type(2) { top: 14px; right: 14px; }
+.qr-box i:nth-of-type(3) { bottom: 14px; left: 14px; }
+.qr-box span {
+  font-size: 0.6875rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--faint); text-align: center; line-height: 1.8;
+}
+.qr figcaption { margin-top: 8px; font-size: 0.8125rem; color: var(--faint); }
+
+/* ---- footer ------------------------------------------------------------- */
+.end {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+  padding: 16px var(--pad) 40px;
+  border-top: 1px solid var(--line-2);
+  font-size: 0.8125rem; color: var(--faint);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="sheet">
+
+  <header class="bar">
+    <div class="bar-in">
+      <a class="bar-id" href="#identity">
+        Laurence Rebadulla
+        <span class="bar-sep">·</span>
+        <span class="bar-role">Senior Software Engineer | AI Developer</span>
+      </a>
+      <nav class="nav" aria-label="Sections">
+        <a href="#identity"><span class="ni">01</span>Identity</a>
+        <a href="#about"><span class="ni">02</span>About</a>
+        <a href="#stack"><span class="ni">03</span>Stack</a>
+        <a href="#work"><span class="ni">04</span>Work</a>
+        <a href="#experience"><span class="ni">05</span>Experience</a>
+        <a href="#writing"><span class="ni">06</span>Writing</a>
+        <a href="#contact"><span class="ni">07</span>Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 01 ==================================================================== -->
+  <section class="sec" id="identity">
+    <div class="ch">
+      <span class="ch-i">01</span>
+      <h2 class="ch-n">Identity</h2>
+      <span class="ch-m">Status <span class="on">available</span> · UTC+08:00</span>
+    </div>
+
+    <div class="id-grid">
+      <div class="id-main">
+        <h1 class="id-h1">
+          <span class="id-name">Laurence Rebadulla</span>
+          <span class="id-role">Senior Software Engineer | AI Developer</span>
+        </h1>
+
+        <p class="id-claim">I ship production software. Then I make it intelligent.</p>
+
+        <p class="id-lede">Nine years building web applications and backend systems in Python, Django, FastAPI, TypeScript and React. Current focus: LLM integration and retrieval pipelines running in production.</p>
+
+        <p class="id-act">
+          <a href="mailto:glrebadulla@gmail.com">glrebadulla@gmail.com</a>
+          <span class="dot">·</span>
+          <a href="/uploads/latest-cv.pdf" download="Laurence Rebadulla - Senior Software Engineer AI Developer CV.pdf">Download CV (PDF)</a>
+        </p>
+      </div>
+
+      <dl class="readout">
+        <div class="ro"><dt>Status</dt><dd class="state">Available</dd></div>
+        <div class="ro"><dt>Base</dt><dd>Philippines</dd></div>
+        <div class="ro"><dt>Mode</dt><dd>Remote</dd></div>
+        <div class="ro"><dt>Timezone</dt><dd>UTC+08:00</dd></div>
+        <div class="ro"><dt>Focus</dt><dd>LLM · RAG pipelines</dd></div>
+        <div class="ro"><dt>Sectors</dt><dd>4</dd></div>
+      </dl>
+    </div>
+
+    <dl class="stats">
+      <div class="stat">
+        <dt>Shipping software</dt>
+        <dd>9+<span class="u">yr</span><span class="note">Web applications and backend systems</span></dd>
+      </div>
+      <div class="stat">
+        <dt>Industries</dt>
+        <dd>4<span class="u">sectors</span><span class="note">Media · health · government · telecom</span></dd>
+      </div>
+      <div class="stat">
+        <dt>In production</dt>
+        <dd class="txt">LLM+RAG<span class="note">Integration and retrieval pipelines</span></dd>
+      </div>
+      <div class="stat">
+        <dt>Remote since 2023</dt>
+        <dd>100%<span class="note">International teams</span></dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- 02 ==================================================================== -->
+  <section class="sec" id="about">
+    <div class="ch">
+      <span class="ch-i">02</span>
+      <h2 class="ch-n">About</h2>
+      <span class="ch-m">End to end · 4 sectors shipped</span>
+    </div>
+
+    <div class="ab">
+      <figure class="ph">
+        <div class="ph-box" role="img" aria-label="Placeholder for a portrait photograph of Laurence Rebadulla">
+          <span>Photo</span>
+        </div>
+        <figcaption>me.jpg · portrait · 4:5</figcaption>
+      </figure>
+
+      <div>
+        <p class="ab-lead">End-to-end ownership, minimal supervision.</p>
+        <p class="ab-body">I build features end to end: database design, APIs, frontend, and deployment on AWS. I've shipped products in media, telehealth, government and telecom. These days I add LLM features through the OpenAI API and retrieval pipelines with embeddings and LangChain, so products answer from their own data instead of generic model output.</p>
+
+        <dl class="ab-meta">
+          <div><dt>Owns</dt><dd>Schema · API · UI · deploy</dd></div>
+          <div><dt>Cloud</dt><dd>AWS</dd></div>
+          <div><dt>AI layer</dt><dd>OpenAI API · embeddings · LangChain</dd></div>
+          <div><dt>Sectors</dt><dd>Media · telehealth · gov · telecom</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 ==================================================================== -->
+  <section class="sec" id="stack">
+    <div class="ch">
+      <span class="ch-i">03</span>
+      <h2 class="ch-n">Stack</h2>
+      <span class="ch-m">6 groups · 30 components</span>
+    </div>
+
+    <p class="lede">RAG pipelines and OpenAI features that answer from your data instead of guessing. Already running in tools a content team uses every day.</p>
+
+    <div class="scroll scroll-lede" role="region" aria-label="Stack groups, scrollable table" tabindex="0">
+      <table class="t-skills">
+        <caption class="sr">Stack by group, with component counts, components and current state.</caption>
+        <colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Ch</th>
+            <th scope="col">Group</th>
+            <th scope="col" class="num">N</th>
+            <th scope="col">Components</th>
+            <th scope="col">State</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="idx">01</td>
+            <th scope="row">AI / LLM<span class="sub">lead differentiator</span></th>
+            <td class="num">4</td>
+            <td class="stack"><span class="ai">OpenAI API</span> · <span class="ai">embeddings + retrieval (RAG)</span> · <span class="ai">LangChain</span> · <span class="ai">Claude Code</span></td>
+            <td class="state prod">Production</td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="idx">02</td>
+            <th scope="row">Languages<span class="sub">daily drivers</span></th>
+            <td class="num">4</td>
+            <td class="stack">Python · TypeScript · JavaScript · SQL</td>
+            <td class="state">Active</td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="idx">03</td>
+            <th scope="row">Backend<span class="sub">APIs that hold up under real load</span></th>
+            <td class="num">8</td>
+            <td class="stack">Django · DRF · FastAPI · Flask · Node.js · Celery · Redis · REST design</td>
+            <td class="state">Active</td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="idx">04</td>
+            <th scope="row">Frontend<span class="sub">typed React interfaces that load fast</span></th>
+            <td class="num">4</td>
+            <td class="stack">React · Next.js · TanStack (Start · Router · Query) · Vite</td>
+            <td class="state">Active</td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="idx">05</td>
+            <th scope="row">Cloud / DevOps<span class="sub">deployed, monitored and scaled</span></th>
+            <td class="num">5</td>
+            <td class="stack">AWS (EC2 · S3 · Lambda · RDS · API Gateway · CloudWatch) · Docker · Linux · CI/CD · Cloudflare Workers + R2</td>
+            <td class="state">Active</td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td class="idx">06</td>
+            <th scope="row">Databases<span class="sub">the right store for the job</span></th>
+            <td class="num">5</td>
+            <td class="stack">PostgreSQL · MySQL · MongoDB · Firebase · Supabase</td>
+            <td class="state">Active</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note">N = components listed in that group. AWS sub-services counted as one entry.</p>
+  </section>
+
+  <!-- 04 ==================================================================== -->
+  <section class="sec" id="work">
+    <div class="ch">
+      <span class="ch-i">04</span>
+      <h2 class="ch-n">Work</h2>
+      <span class="ch-m">6 projects · 2 with LLM</span>
+    </div>
+
+    <div class="scroll" role="region" aria-label="Projects, scrollable table" tabindex="0">
+      <table class="t-work">
+        <caption class="sr">Six projects with stack, whether an LLM is part of the system, and a summary.</caption>
+        <colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Idx</th>
+            <th scope="col">Project</th>
+            <th scope="col">Stack</th>
+            <th scope="col" class="rt">LLM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">01</td>
+            <th scope="row" class="name"><a href="/projects/rag-analytics-assistant">rag-analytics-assistant</a></th>
+            <td class="stack"><span class="ai">LangChain</span> · <span class="ai">OpenAI</span> · FastAPI</td>
+            <td class="flag yes">Yes</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/rag-analytics-assistant</span><span class="body">Plain-language search over company analytics. Retrieval pipelines with OpenAI embeddings and LangChain ground every answer in real company data.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">02</td>
+            <th scope="row" class="name"><a href="/projects/llm-content-tools">llm-content-tools</a></th>
+            <td class="stack"><span class="ai">OpenAI API</span> · Python</td>
+            <td class="flag yes">Yes</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/llm-content-tools</span><span class="body">LLM features in internal tools via the OpenAI API: content suggestions, automated reports, and plain-language search that cut manual work for the content team.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">03</td>
+            <th scope="row" class="name"><a href="/projects/creator-analytics-dashboard">creator-analytics-dashboard</a></th>
+            <td class="stack">Python · AWS · Telegram · Discord API</td>
+            <td class="flag">No</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/creator-analytics-dashboard</span><span class="body">Real-time revenue, engagement and growth tracking with automated Telegram and Discord alerts. The content team uses it daily instead of pulling reports by hand.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">04</td>
+            <th scope="row" class="name"><a href="/projects/telehealth-platform">telehealth-platform</a></th>
+            <td class="stack">Django REST · Next.js · AWS</td>
+            <td class="flag">No</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/telehealth-platform</span><span class="body">Employees book and meet mental-health practitioners over live chat, voice and video. Built with Python, Django REST, React and Next.js on AWS.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">05</td>
+            <th scope="row" class="name"><a href="/projects/e-legislative-system">e-legislative-system</a></th>
+            <td class="stack">Django · React · AWS · Docker</td>
+            <td class="flag">No</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/e-legislative-system</span><span class="body">Moved local government legislative work online: bill drafting, committee deliberation, and public hearings. Built with Python, Django, and React on AWS.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">06</td>
+            <th scope="row" class="name"><a href="/projects/carrier-api-platform">carrier-api-platform</a></th>
+            <td class="stack">Flask · Node.js · AWS</td>
+            <td class="flag">No</td>
+          </tr>
+          <tr class="det">
+            <td colspan="4"><span class="slug">/projects/carrier-api-platform</span><span class="body">Public developer APIs for one of the largest PH telecoms. Businesses integrate carrier-level features (SMS, voice, location, rewards, geofencing, USSD) into their websites, mobile apps, and software systems.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note">Ordered by impact. No screenshots exist for these systems, so none are shown.</p>
+  </section>
+
+  <!-- 05 ==================================================================== -->
+  <section class="sec" id="experience">
+    <div class="ch">
+      <span class="ch-i">05</span>
+      <h2 class="ch-n">Experience</h2>
+      <span class="ch-m">4 roles · 2018 → present</span>
+    </div>
+
+    <div class="scroll" role="region" aria-label="Experience, scrollable table" tabindex="0">
+      <table class="t-exp">
+        <caption class="sr">Four roles with period, title, scope, organization and stack.</caption>
+        <colgroup><col class="c1"><col class="c2"><col class="c3"><col class="c4"><col class="c5"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Idx</th>
+            <th scope="col">Period</th>
+            <th scope="col">Role</th>
+            <th scope="col">Organization</th>
+            <th scope="col">Stack</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">01</td>
+            <td class="period now">2024 — present</td>
+            <th scope="row">Senior Full Stack Developer</th>
+            <td class="org">US-based Media Company<span class="sub">remote</span></td>
+            <td class="stack">Python · FastAPI · React · AWS</td>
+          </tr>
+          <tr class="det">
+            <td colspan="5"><span class="body">LLM features via the OpenAI API, retrieval pipelines, real-time analytics, social automation.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">02</td>
+            <td class="period">2023 — 2024</td>
+            <th scope="row">Senior Full Stack Developer</th>
+            <td class="org">Connect Psych Services<span class="sub">remote</span></td>
+            <td class="stack">Django REST · React · Next.js · AWS</td>
+          </tr>
+          <tr class="det">
+            <td colspan="5"><span class="body">Telehealth platform with live chat, voice and video.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">03</td>
+            <td class="period">2020 — 2023</td>
+            <th scope="row">Software Developer → Senior</th>
+            <td class="org">LITS</td>
+            <td class="stack">Django · React · Odoo</td>
+          </tr>
+          <tr class="det">
+            <td colspan="5"><span class="body">Led the E-Legislative System for local government. Odoo CRM, Website and HRIS. Promoted for technical leadership.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">04</td>
+            <td class="period">2018 — 2019</td>
+            <th scope="row">Junior Software Engineer</th>
+            <td class="org">Infoshift Inc.</td>
+            <td class="stack">Flask · Node.js · AWS microservices</td>
+          </tr>
+          <tr class="det">
+            <td colspan="5"><span class="body">Public developer APIs for one of the largest PH telecoms.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="foot-note">Amber period marks the current role.</p>
+  </section>
+
+  <!-- 06 ==================================================================== -->
+  <section class="sec" id="writing">
+    <div class="ch">
+      <span class="ch-i">06</span>
+      <h2 class="ch-n">Writing</h2>
+      <span class="ch-m">2 posts · 2026</span>
+    </div>
+
+    <div class="scroll" role="region" aria-label="Writing, scrollable table" tabindex="0">
+      <table class="t-log">
+        <caption class="sr">Two posts with publication date, title and summary.</caption>
+        <colgroup><col class="c1"><col class="c2"><col class="c3"></colgroup>
+        <thead>
+          <tr>
+            <th scope="col">Idx</th>
+            <th scope="col">Date</th>
+            <th scope="col">Title</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">01</td>
+            <td class="date">2026-07-13</td>
+            <th scope="row" class="name"><a href="/blog">From writing code to directing AI</a></th>
+          </tr>
+          <tr class="det">
+            <td colspan="3"><span class="body">My last role integrating AI changed how I see the job. The future is less about writing every line and more about directing AI to solve real business problems.</span></td>
+          </tr>
+        </tbody>
+        <tbody>
+          <tr class="rec">
+            <td class="idx">02</td>
+            <td class="date">2026-07-06</td>
+            <th scope="row" class="name"><a href="/blog">Build for yourself first</a></th>
+          </tr>
+          <tr class="det">
+            <td colspan="3"><span class="body">I build tools to make my own life easier before I build them for anyone else. If something genuinely solves my problem, it usually solves someone else's too.</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 07 ==================================================================== -->
+  <section class="sec" id="contact">
+    <div class="ch">
+      <span class="ch-i">07</span>
+      <h2 class="ch-n">Contact</h2>
+      <span class="ch-m">Email · WhatsApp · CV</span>
+    </div>
+
+    <div class="ct">
+      <div>
+        <p class="ct-lead">Let's build something.</p>
+        <p class="ct-body">Available for senior full-stack and AI integration work. Email me, or scan the code to open a WhatsApp chat directly.</p>
+
+        <dl class="chan">
+          <div>
+            <dt>Email</dt>
+            <dd class="pair">
+              <a href="mailto:glrebadulla@gmail.com">glrebadulla@gmail.com</a>
+              <button class="copy" id="copy-email" type="button" data-value="glrebadulla@gmail.com"><span>Copy</span></button>
+            </dd>
+          </div>
+          <div>
+            <dt>WhatsApp</dt>
+            <dd><a href="https://wa.me/639171477836">wa.me/639171477836</a></dd>
+          </div>
+          <div>
+            <dt>CV</dt>
+            <dd><a href="/uploads/latest-cv.pdf" download="Laurence Rebadulla - Senior Software Engineer AI Developer CV.pdf">latest-cv.pdf</a></dd>
+          </div>
+          <div>
+            <dt>GitHub</dt>
+            <dd><a href="https://github.com/renzyndrome">github.com/renzyndrome</a></dd>
+          </div>
+          <div>
+            <dt>LinkedIn</dt>
+            <dd><a href="https://linkedin.com/in/laurencerebadulla">linkedin.com/in/laurencerebadulla</a></dd>
+          </div>
+          <div>
+            <dt>Site</dt>
+            <dd><a href="https://glrebadulla.dev">glrebadulla.dev</a></dd>
+          </div>
+          <div>
+            <dt>Timezone</dt>
+            <dd>UTC+08:00 · Philippines</dd>
+          </div>
+        </dl>
+      </div>
+
+      <figure class="qr">
+        <div class="qr-box" role="img" aria-label="Placeholder for the WhatsApp QR code that opens a chat at wa.me/639171477836">
+          <i></i><i></i><i></i>
+          <span>QR<br>placeholder</span>
+        </div>
+        <figcaption>WhatsApp · 180 × 180</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <footer class="end">
+    <span>© 2026 Laurence Rebadulla · Philippines (remote, UTC+8)</span>
+    <span>glrebadulla.dev</span>
+  </footer>
+
+</div>
+
+<script>
+  (function () {
+    var btn = document.getElementById('copy-email');
+    if (!btn || !navigator.clipboard) return;
+    var label = btn.querySelector('span');
+    var base = label.textContent;
+    var timer;
+    btn.addEventListener('click', function () {
+      navigator.clipboard.writeText(btn.getAttribute('data-value')).then(function () {
+        label.textContent = 'Copied';
+        btn.setAttribute('data-state', 'done');
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          label.textContent = base;
+          btn.removeAttribute('data-state');
+        }, 1600);
+      });
+    });
+  })();
+</script>

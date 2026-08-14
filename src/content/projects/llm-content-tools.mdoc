@@ -1,26 +1,39 @@
 ---
 name: llm-content-tools
 order: 20
-icon: llm
 description: "LLM features in internal tools via the OpenAI API: content suggestions, automated reports, and plain-language search that cut manual work for the content team."
 chips:
-  - label: OpenAI API
+  - label: LLM integration
     ai: true
   - label: Python
     ai: false
 ---
 
-## What it does
+## Where it lives
 
-A set of LLM features built into tools a content team already uses: draft
-suggestions, automated reporting, and plain-language search.
+These features sit inside tools the content team already had open. Nobody wants a
+separate AI product to go and visit, so the entry points are on the pages where the
+work was happening anyway: a suggestion beside the draft, a report on the screen that
+used to be assembled by hand, a search box that accepts a sentence instead of a set of
+filters.
 
-## Approach
+## Designing for the wrong answer
 
-Shipped against the OpenAI API with careful prompt design and guardrails, then
-measured on real usage so each feature saved time instead of adding noise.
+The interesting part of shipping an LLM feature is not the happy path. It is what the
+product does when the model returns something malformed, wrong, or slow. Every call has
+a defined output shape and gets validated before anything downstream touches it.
+Prompts are versioned, so when quality shifts there is something to compare against.
+A person stays in the loop on anything that gets published: suggestions stay
+suggestions, and nothing posts itself.
 
-## Impact
+## What stuck
 
-Cut repetitive manual work for the content team and became part of their daily
-workflow.
+Draft suggestions, automated reporting that replaced a manual assembly step, and
+plain-language search over the team's own data. The features that became part of the
+daily routine were the ones that removed a step somebody repeated every day. A couple
+of ideas that demoed well were dropped, because on closer look they added a decision
+rather than removing one.
+
+## Stack
+
+Python against the OpenAI API, built into the team's existing internal tools.

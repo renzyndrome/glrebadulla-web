@@ -1,7 +1,6 @@
 ---
 name: carrier-api-platform
 order: 60
-icon: api
 description: "Public developer APIs for one of the largest PH telecoms. Businesses integrate carrier-level features (SMS, voice, location, rewards, geofencing, USSD) into their websites, mobile apps, and software systems."
 chips:
   - label: Flask
@@ -12,24 +11,40 @@ chips:
     ai: false
 ---
 
-## What it does
+The earliest project here, from my first engineering role.
 
-A developer API platform for one of the largest Philippine telecom providers.
-Businesses connect to it to integrate carrier-level features directly into their
-websites, mobile apps, and software systems: SMS, voice, location, rewards,
-geofencing, and USSD.
+## The platform
 
-## Approach
+A public developer API for one of the largest telecom providers in the Philippines.
+Other businesses built against it to put carrier-level capabilities into their own
+products: SMS, voice, location, rewards, geofencing and USSD.
 
-Maintained the public APIs and the microservices behind them, and wrote the
-documentation and onboarding guides that external developers used to integrate.
+## A public API changes the rules
 
-## Operations
+An internal API can be fixed by messaging the one team that calls it. A public one
+cannot. Someone else's production depends on the response shape you already shipped,
+so changes have to be additive, versions have to be real, and removing anything needs a
+deprecation path rather than a rename and an apology. Learning that constraint early,
+on a platform where the callers were strangers, was the most useful thing I took from
+the job.
 
-Owned much of the DevOps side: kept the services up and monitored, handled
-scaling and deployments, and wrote root-cause-analysis reports after incidents.
-The day-to-day work was heavily focused on AWS services.
+## Running it
+
+I owned a good share of the operations work: keeping services up and monitored,
+handling deploys and scaling, and writing the root-cause analysis after an incident.
+Writing RCAs is what trained me to look past the thing that broke and ask why the
+system allowed it to break. Most of that was AWS day to day.
+
+## Documentation as part of the product
+
+I wrote the API documentation and the onboarding guides external developers used. On a
+public API the docs are not a chore attached to the work, they are the surface most
+integrators actually touch. An endpoint nobody can work out how to call may as well not
+exist. Writing them also turned out to be the fastest way to find design flaws, because
+having to explain an awkward interface in plain language makes the awkwardness
+impossible to ignore.
 
 ## Stack
 
-Flask and Node.js in a microservices setup on AWS (EC2, API Gateway, CloudWatch).
+Flask and Node.js in a microservices setup on AWS, using EC2, API Gateway, Lambda and
+CloudWatch.
