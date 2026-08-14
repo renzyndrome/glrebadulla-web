@@ -1,0 +1,27 @@
+// Cloudflare deploy config.
+//
+// WHY THIS FILE EXISTS: the build is deployed with `npx wrangler deploy`. When
+// wrangler finds no config, it runs its framework auto-config, which executes
+// `astro add cloudflare` and then rebuilds with the @astrojs/cloudflare adapter.
+// That adapter (14.2.1) is not compatible with astro 7.0.9 and the rebuild dies
+// on `[MISSING_EXPORT] "beginContentEntryCollection"`. This site does not need an
+// adapter at all: `astro build` emits plain static files. Having this config
+// present keeps auto-config from running and tells wrangler to upload dist/ as
+// static assets.
+//
+// Do not add an `adapter` to astro.config.mjs to "fix" a Cloudflare build. The
+// static output is the design (see CLAUDE.md).
+//
+// `main` is intentionally absent: with only `assets`, this deploys as an
+// assets-only Worker with no server code.
+//
+// html_handling defaults to "auto-trailing-slash", which serves /blog and
+// /projects/<slug> from blog.html and <slug>.html. That is what keeps the site's
+// extensionless links working alongside astro's build.format: 'file'.
+{
+  "name": "glrebadulla-web",
+  "compatibility_date": "2026-08-14",
+  "assets": {
+    "directory": "./dist"
+  }
+}

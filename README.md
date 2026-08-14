@@ -158,16 +158,29 @@ Local mode edits only work on your machine. To edit from any browser on the live
 
 ---
 
-## Deployment (Cloudflare Pages)
+## Deployment (Cloudflare)
 
-Connect the repo in the Cloudflare Pages dashboard with:
+Cloudflare builds on every push to `main`. Settings:
 
 | Setting | Value |
 |---|---|
 | Framework preset | Astro |
 | Build command | `pnpm build` (the repo is pnpm-only: `packageManager` is pinned and `pnpm-lock.yaml` is the sole lockfile) |
+| Deploy command | `npx wrangler deploy` |
 | Output directory | `dist` |
 | Environment variable | `NODE_VERSION=22` (Astro 7 needs ≥ 22.12) |
+
+> **`wrangler.jsonc` must stay.** The deploy step runs `wrangler deploy`, and when wrangler finds no
+> config it runs framework auto-config, which executes `astro add cloudflare` and rebuilds with the
+> `@astrojs/cloudflare` adapter. That adapter is incompatible with Astro 7.0.9 and the rebuild fails
+> on `[MISSING_EXPORT] "beginContentEntryCollection"`. The config makes wrangler skip auto-config and
+> upload `dist/` as an assets-only Worker, which is all this site needs. **Never add an adapter to
+> `astro.config.mjs` to fix a Cloudflare build** — static output is the design. `wrangler` is also
+> pinned as a devDependency so a new release cannot change deploy behaviour underneath you.
+>
+> Clean URLs keep working because Workers static assets defaults `html_handling` to
+> `auto-trailing-slash`, which serves `/blog` and `/projects/<slug>` from the `.html` files that
+> `build.format: 'file'` emits. Validate a config change without deploying: `npx wrangler deploy --dry-run`.
 
 > **`sharp` is a direct dependency on purpose.** `astro:assets` optimises the portrait at build
 > time and needs sharp. Locally it resolved through pnpm's hoisting even when it was only a
