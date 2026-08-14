@@ -165,9 +165,17 @@ Connect the repo in the Cloudflare Pages dashboard with:
 | Setting | Value |
 |---|---|
 | Framework preset | Astro |
-| Build command | `npm run build` |
+| Build command | `pnpm build` (the repo is pnpm-only: `packageManager` is pinned and `pnpm-lock.yaml` is the sole lockfile) |
 | Output directory | `dist` |
-| Environment variable | `NODE_VERSION=22` |
+| Environment variable | `NODE_VERSION=22` (Astro 7 needs ≥ 22.12) |
+
+> **`sharp` is a direct dependency on purpose.** `astro:assets` optimises the portrait at build
+> time and needs sharp. Locally it resolved through pnpm's hoisting even when it was only a
+> transitive dep of Astro, so builds passed; on a clean `pnpm install --frozen-lockfile` (what
+> Cloudflare runs) pnpm's isolated `node_modules` makes a transitive dep unreachable from the
+> project root and the build fails with `MissingSharp`. Keep it in `dependencies`. To check a
+> deploy will work before pushing, reproduce the clean install:
+> `git ls-files -co --exclude-standard | tar -cf - -T - | (cd /tmp/x && tar -xf -) && cd /tmp/x && pnpm install --frozen-lockfile && pnpm build`
 
 No adapter, `wrangler`, or `_headers` file is required — the production build (`KEYSTATIC` unset) is plain static files. The custom domain `glrebadulla.dev` is added later in the Pages settings. Clean URLs (`/blog/<slug>`) work out of the box: the build emits `blog/<slug>.html` and Cloudflare Pages serves it extensionless (verified with `wrangler pages dev`).
 
